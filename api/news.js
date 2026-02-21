@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     {
       label: 'NHK経済',
       color: '#0070C0',
-      url: 'https://www3.nhk.or.jp/rss/news/cat2.xml',
+      url: 'https://www3.nhk.or.jp/rss/news/cat5.xml',
     },
   ];
 
