@@ -340,13 +340,13 @@ function CTip({active,payload,label,indicator}){if(!active||!payload?.length)ret
 
 function Gauge({score,size=110}){const a=(score/100)*180-180;const r=size/2-8;const cx=size/2;const cy=size/2+5;const nx=cx+r*.7*Math.cos(a*Math.PI/180);const ny=cy+r*.7*Math.sin(a*Math.PI/180);return(<svg width={size} height={size*.62} viewBox={`0 0 ${size} ${size*.62}`}><defs><linearGradient id="gg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#E8453C"/><stop offset="25%" stopColor="#F5A623"/><stop offset="50%" stopColor="#888"/><stop offset="75%" stopColor="#B8E986"/><stop offset="100%" stopColor="#7ED321"/></linearGradient></defs><path d={`M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy}`} fill="none" stroke="url(#gg)" strokeWidth="6" strokeLinecap="round"/><line x1={cx} y1={cy} x2={nx} y2={ny} stroke="#e8e8e8" strokeWidth="2" strokeLinecap="round"/><circle cx={cx} cy={cy} r="3" fill="#e8e8e8"/><text x={cx-r+2} y={cy+14} fill="#E8453C" fontSize="8" fontFamily="monospace">弱気</text><text x={cx+r-18} y={cy+14} fill="#7ED321" fontSize="8" fontFamily="monospace">強気</text></svg>);}
 
-function MiniCard({ind,data,isSel,onClick,sig,accentColor}){const inf=INDICATORS[ind];const ac=accentColor||inf.color;const lt=data?.[data.length-1];const pv=data?.[data.length-2];const ch=lt&&pv?((lt.value-pv.value)/pv.value*100):0;const up=ch>=0;const sl=sig?SL[sig.signal]:null;const [hov,setHov]=useState(false);const spark=data?data.slice(-40):[];
+function MiniCard({ind,data,isSel,onClick,sig,accentColor,compact}){const inf=INDICATORS[ind];const ac=accentColor||inf.color;const lt=data?.[data.length-1];const pv=data?.[data.length-2];const ch=lt&&pv?((lt.value-pv.value)/pv.value*100):0;const up=ch>=0;const sl=sig?SL[sig.signal]:null;const [hov,setHov]=useState(false);const spark=data?data.slice(-40):[];const showSpark=!compact||isSel;
 return(<div style={{position:"relative"}} onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}>
 <button onClick={onClick} style={{background:isSel?ac+"14":"rgba(255,255,255,.015)",border:"1px solid "+(isSel?ac+"55":"rgba(255,255,255,.05)"),borderRadius:10,padding:"10px 12px 6px",cursor:"pointer",textAlign:"left",transition:"all .25s",position:"relative",overflow:"hidden",width:"100%"}}>
 {isSel&&<div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:ac,borderRadius:"3px 0 0 3px"}}/>}
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><p style={{color:"#aaa",fontSize:11,margin:0,fontWeight:600}}>{inf.name}</p>{sl&&<span style={{background:sl.bg,color:sl.color,padding:"1px 5px",borderRadius:4,fontSize:9,fontWeight:700,fontFamily:"monospace"}}>{sl.emoji}</span>}</div>
 <div style={{display:"flex",alignItems:"baseline",gap:6,marginTop:4}}><span style={{color:"#e4e4e4",fontSize:18,fontWeight:800,fontFamily:"monospace"}}>{lt?Number(lt.value).toLocaleString(undefined,{maximumFractionDigits:2}):"—"}</span><span style={{color:up?"#7ED321":"#E8453C",fontSize:10,fontWeight:700,fontFamily:"monospace"}}>{up?"▲":"▼"}{Math.abs(ch).toFixed(2)}%</span></div>
-{spark.length>2&&<div style={{width:"100%",height:26,marginTop:3}}><ResponsiveContainer width="100%" height="100%"><AreaChart data={spark} margin={{top:1,right:0,left:0,bottom:0}}><defs><linearGradient id={"sc-"+ind} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={isSel?ac:"rgba(255,255,255,.3)"} stopOpacity={isSel?.25:.06}/><stop offset="100%" stopColor={isSel?ac:"rgba(255,255,255,.3)"} stopOpacity={0}/></linearGradient></defs><XAxis dataKey="date" hide/><YAxis hide domain={["auto","auto"]}/><Area type="monotone" dataKey="value" stroke={isSel?ac:"rgba(255,255,255,.15)"} strokeWidth={isSel?1.5:1} fill={"url(#sc-"+ind+")"} dot={false}/></AreaChart></ResponsiveContainer></div>}
+{showSpark&&spark.length>2&&<div style={{width:"100%",height:26,marginTop:3}}><ResponsiveContainer width="100%" height="100%"><AreaChart data={spark} margin={{top:1,right:0,left:0,bottom:0}}><defs><linearGradient id={"sc-"+ind} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={isSel?ac:"rgba(255,255,255,.3)"} stopOpacity={isSel?.25:.06}/><stop offset="100%" stopColor={isSel?ac:"rgba(255,255,255,.3)"} stopOpacity={0}/></linearGradient></defs><XAxis dataKey="date" hide/><YAxis hide domain={["auto","auto"]}/><Area type="monotone" dataKey="value" stroke={isSel?ac:"rgba(255,255,255,.15)"} strokeWidth={isSel?1.5:1} fill={"url(#sc-"+ind+")"} dot={false}/></AreaChart></ResponsiveContainer></div>}
 </button>
 {hov&&<div style={{position:"absolute",top:"calc(100% + 5px)",left:0,minWidth:"100%",width:"max-content",maxWidth:260,background:"rgba(8,8,13,.97)",border:"1px solid "+ac+"40",borderRadius:9,padding:"9px 11px",zIndex:300,pointerEvents:"none",boxShadow:"0 6px 24px rgba(0,0,0,.7)"}}>
   <p style={{color:"#bbb",fontSize:10,margin:0,lineHeight:1.65,fontWeight:500}}>{inf.desc}</p>
@@ -354,6 +354,42 @@ return(<div style={{position:"relative"}} onMouseEnter={()=>setHov(true)} onMous
   <p style={{color:"#444",fontSize:8,margin:"5px 0 0",fontFamily:"monospace"}}>{inf.freq} · {inf.unit} · {inf.id}</p>
 </div>}
 </div>);}
+
+// ─── MATRIX LAYOUT ───────────────────────────────────────────────────────
+const MATRIX_COLS=[
+  {id:'employment',label:'👷 雇用'},
+  {id:'inflation',label:'🔥 物価'},
+  {id:'policy',label:'🏛 金融政策'},
+  {id:'economy',label:'📊 景気'},
+  {id:'market',label:'📈 市場'},
+  {id:'commodity',label:'🪙 コモディティ'},
+];
+const MATRIX_ROWS=[
+  {id:'us',label:'🇺🇸 米国',keys:{
+    employment:['NFP','UNRATE','ICSA','JOLTS'],
+    inflation:['CPI','CORECPI','PCECORE'],
+    policy:['FEDFUNDS','M2SL'],
+    economy:['GDP','ISM','RETAIL','UMCSENT','HOUST','CSUSHPISA','INDPRO'],
+    market:['DGS10','DGS2','T10Y2Y','VIX','SP500','GSPC','MORTGAGE30','HYSPREAD'],
+    commodity:['COPPER','BITCOIN','GOLD','OIL_WTI','NATGAS','WHEAT'],
+  }},
+  {id:'jp',label:'🇯🇵 日本',keys:{
+    employment:['JP_UNRATE'],
+    inflation:['JP_CPI','JP_CORECPI'],
+    policy:['JP_BOJ','JP_M2'],
+    economy:['JP_GDP','JP_INDPRO','JP_CONF','JP_BCONF','JP_EXPORT','JP_IMPORT'],
+    market:['JP_JGB10','JP_NIKKEI','JP_USDJPY'],
+    commodity:[],
+  }},
+  {id:'other',label:'🌍 その他',keys:{
+    employment:['EU_UNRATE'],
+    inflation:['EU_CPI','IN_CPI'],
+    policy:['EU_ECB','IN_RATE'],
+    economy:['EU_GDP','IN_GDP'],
+    market:['EURUSD','IN_USDINR'],
+    commodity:[],
+  }},
+];
 
 // ─── APP ─────────────────────────────────────────────────────────────────
 export default function App(){
@@ -488,22 +524,46 @@ export default function App(){
     </div>
   </div>
 
-  {/* CATEGORY FILTER */}
-  <div style={{display:"flex",gap:3,marginBottom:8,flexWrap:"wrap",overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
-    <B a={catFilter==="all"} onClick={()=>setCatFilter("all")}>全て</B>
-    {Object.entries(CATEGORIES).map(([ck,cat])=><B key={ck} a={catFilter===ck} c={cat.color} onClick={()=>setCatFilter(ck)}>{cat.emoji}{cat.name}</B>)}
-  </div>
-
-  {/* CARDS */}
-  {vw===VS.C&&<p style={{color:"#555",fontSize:9,fontFamily:"monospace",margin:"0 0 6px"}}>カードを2つ選択（左軸・右軸で実値表示） · 選択中: {ci.length}/2</p>}
-  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:6,marginBottom:10}}>
-    {filteredInds.map(k=>{const ciIdx=ci.indexOf(k);const ac=vw===VS.C&&ciIdx>=0?COMPARE_COLORS[ciIdx]:undefined;return(<MiniCard key={k} ind={k} data={gf(k)}
-      isSel={vw===VS.C ? ci.includes(k) : sel===k}
-      onClick={vw===VS.C
-        ? ()=>setCi(p=>p.includes(k)?p.filter(x=>x!==k):p.length>=2?p:[...p,k])
-        : ()=>setSel(k)}
-      sig={sigs[k]} accentColor={ac}/>);})}
-  </div>
+  {/* MATRIX / FLAT CARDS */}
+  {vw===VS.M ? (
+    <>
+      <div style={{display:"flex",gap:3,marginBottom:8,flexWrap:"wrap",overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
+        <B a={catFilter==="all"} onClick={()=>setCatFilter("all")}>全て</B>
+        {Object.entries(CATEGORIES).map(([ck,cat])=><B key={ck} a={catFilter===ck} c={cat.color} onClick={()=>setCatFilter(ck)}>{cat.emoji}{cat.name}</B>)}
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:6,marginBottom:10}}>
+        {filteredInds.map(k=>{const ciIdx=ci.indexOf(k);const ac=ciIdx>=0?COMPARE_COLORS[ciIdx]:undefined;return(<MiniCard key={k} ind={k} data={gf(k)} isSel={sel===k} onClick={()=>setSel(k)} sig={sigs[k]} accentColor={ac} compact/>);})}
+      </div>
+    </>
+  ) : (
+    <div style={{overflowX:"auto",marginBottom:10,WebkitOverflowScrolling:"touch"}}>
+      {vw===VS.C&&<p style={{color:"#555",fontSize:9,fontFamily:"monospace",margin:"0 0 5px"}}>カードを2つ選択 · 選択中: {ci.length}/2</p>}
+      <div style={{minWidth:860}}>
+        <div style={{display:"grid",gridTemplateColumns:"56px repeat(6,1fr)",gap:3,marginBottom:3}}>
+          <div/>
+          {MATRIX_COLS.map(col=><div key={col.id} style={{textAlign:"center",padding:"5px 4px",background:"rgba(255,255,255,.03)",borderRadius:6,fontSize:9,fontWeight:700,color:"#777",letterSpacing:".04em",whiteSpace:"nowrap"}}>{col.label}</div>)}
+        </div>
+        {MATRIX_ROWS.map(row=>(
+          <div key={row.id} style={{display:"grid",gridTemplateColumns:"56px repeat(6,1fr)",gap:3,marginBottom:3,alignItems:"stretch"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(255,255,255,.025)",borderRadius:8,padding:"4px 2px",fontSize:9,fontWeight:700,color:"#999",textAlign:"center",writingMode:"vertical-rl",transform:"rotate(180deg)",letterSpacing:".06em"}}>
+              {row.label}
+            </div>
+            {MATRIX_COLS.map(col=>{const keys=row.keys[col.id]||[];return(
+              <div key={col.id} style={{background:"rgba(255,255,255,.012)",border:"1px solid rgba(255,255,255,.04)",borderRadius:8,padding:3,display:"flex",flexDirection:"column",gap:2,minHeight:44,maxHeight:440,overflowY:"auto"}}>
+                {keys.map(k=>{const ciIdx=ci.indexOf(k);const ac=vw===VS.C&&ciIdx>=0?COMPARE_COLORS[ciIdx]:undefined;return(
+                  <MiniCard key={k} ind={k} data={gf(k)}
+                    isSel={vw===VS.C?ci.includes(k):sel===k}
+                    onClick={vw===VS.C?()=>setCi(p=>p.includes(k)?p.filter(x=>x!==k):p.length>=2?p:[...p,k]):()=>setSel(k)}
+                    sig={sigs[k]} accentColor={ac} compact/>
+                );})}
+                {keys.length===0&&<div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{color:"rgba(255,255,255,.06)",fontSize:11}}>—</span></div>}
+              </div>
+            );})}
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
 
   {/* TABS + TIMEFRAME */}
   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10,flexWrap:"wrap",gap:6}}>
