@@ -62,17 +62,14 @@ const INDICATORS = {
   JP_IMPORT:{id:"XTIMVA01JPM667S",name:"輸入金額(日)",nameEn:"Japan Imports",unit:"百万$",color:"#E74C3C",cat:"japan",freq:"月次",desc:"日本の輸入金額。エネルギー・食料の輸入コストを反映。",impact:"増加→エネルギー高・内需増 / 貿易赤字拡大→円安圧力",nextRel:"2026-03-18",relName:"貿易統計"},
   // ── ユーロ圏 ──
   EU_ECB:{id:"ECBDFR",name:"ECB政策金利",nameEn:"ECB Deposit Rate",unit:"%",color:"#003399",cat:"eu",freq:"月次",desc:"欧州中央銀行の預金ファシリティ金利。ECBの金融政策の基準。",impact:"利上げ→ユーロ高・欧州株に逆風 / 利下げ→景気刺激",nextRel:"2026-04-17",relName:"ECB会合"},
-  EU_CPI:{id:"EA19CPIALLMINMEI",name:"ユーロ圏CPI",nameEn:"Euro Area CPI",unit:"指数",color:"#0055A5",cat:"eu",freq:"月次",desc:"ユーロ圏19カ国の消費者物価指数。ECBの2%目標の達成状況。",impact:"上昇→ECB利上げ圧力→ユーロ高",nextRel:"2026-03-19",relName:"ユーロ圏CPI"},
   EU_UNRATE:{id:"LRHUTTTTEZM156S",name:"ユーロ圏失業率",nameEn:"Euro Area Unemployment",unit:"%",color:"#4169E1",cat:"eu",freq:"月次",desc:"ユーロ圏の失業率。南欧など国ごとの格差が大きい。",impact:"低下→労働市場改善→消費・景気回復",nextRel:"2026-04-01",relName:"ユーロ圏雇用"},
   EURUSD:{id:"DEXUSEU",name:"EUR/USD",nameEn:"EUR/USD",unit:"ドル",color:"#1F618D",cat:"eu",freq:"日次",desc:"ユーロ対米ドルレート。ドル強弱・ECB対FRBの政策差を反映。",impact:"上昇→ドル安・欧州輸出に逆風 / 低下→ドル高",nextRel:"-",relName:"-"},
   EU_GDP:{id:"CLVMNACSCAB1GQEA19",name:"ユーロ圏GDP",nameEn:"Euro Area GDP",unit:"百万ユーロ",color:"#2E86C1",cat:"eu",freq:"四半期",desc:"ユーロ圏の実質GDP。EU経済全体の成長率を示す。",impact:"成長→欧州株高・ユーロ高 / 縮小→リセッション懸念",nextRel:"2026-04-30",relName:"ユーロ圏GDP"},
   // ── インド ──
   IN_USDINR:{id:"DEXINUS",name:"USD/INR",nameEn:"USD/INR",unit:"ルピー",color:"#FF9933",cat:"india",freq:"日次",desc:"米ドル対インドルピー。新興国通貨の代表的指標。",impact:"ルピー安→インフレ輸入・資本流出リスク",nextRel:"-",relName:"-"},
   IN_CPI:{id:"INDCPIALLMINMEI",name:"インドCPI",nameEn:"India CPI",unit:"指数",color:"#E67E22",cat:"india",freq:"月次",desc:"インドの消費者物価指数。4%±2%がRBIの目標。",impact:"上昇→RBI利上げ圧力→ルピー高",nextRel:"2026-03-12",relName:"インドCPI"},
-  IN_GDP:{id:"NAEXKP01INQ189S",name:"インドGDP",nameEn:"India GDP",unit:"百万ルピー",color:"#D35400",cat:"india",freq:"四半期",desc:"インドの実質GDP。世界最速成長経済の動向を示す。",impact:"高成長→外国資本流入・ルピー高",nextRel:"2026-05-30",relName:"インドGDP"},
   IN_RATE:{id:"IRSTCI01INM156N",name:"インド政策金利",nameEn:"India Policy Rate",unit:"%",color:"#CA6F1E",cat:"india",freq:"月次",desc:"インド準備銀行（RBI）の政策金利。インフレとの兼ね合いで推移。",impact:"利上げ→ルピー高・株式市場に逆風",nextRel:"2026-04-09",relName:"RBI会合"},
   // ── コモディティ追加 ──
-  GOLD:{id:"GOLDPMGBD228NLBM",name:"金価格",nameEn:"Gold",unit:"$/oz",color:"#FFD700",cat:"commodity",freq:"日次",desc:"ロンドン金午後値決め価格。安全資産・インフレヘッジの代表。",impact:"上昇→リスクオフ・インフレ懸念 / 低下→リスクオン",nextRel:"-",relName:"-"},
   OIL_WTI:{id:"DCOILWTICO",name:"原油WTI",nameEn:"Crude Oil WTI",unit:"$/bbl",color:"#566573",cat:"commodity",freq:"日次",desc:"西テキサス産原油の先物価格。エネルギーコスト・インフレの根源。",impact:"上昇→インフレ圧力・エネルギー株高 / 低下→消費者恩恵",nextRel:"-",relName:"-"},
   NATGAS:{id:"MHHNGSP",name:"天然ガス",nameEn:"Natural Gas",unit:"$/MMBtu",color:"#717D7E",cat:"commodity",freq:"月次",desc:"ヘンリーハブ天然ガス価格。電力・暖房コストに直結。",impact:"上昇→光熱費増・インフレ圧力",nextRel:"-",relName:"-"},
   WHEAT:{id:"PWHEAMTUSDM",name:"小麦価格",nameEn:"Wheat",unit:"$/MT",color:"#C8A951",cat:"commodity",freq:"月次",desc:"国際小麦価格。食料インフレ・農業経済の指標。",impact:"上昇→食料インフレ・新興国への打撃",nextRel:"-",relName:"-"},
@@ -84,7 +81,7 @@ const SL={BULLISH:{label:"強気",emoji:"🟢",color:"#7ED321",bg:"#7ED32118"},S
 const COMPARE_COLORS=['#3D9BFF','#FF8C42'];
 
 // ─── DEMO DATA ──────────────────────────────────────────────────────────
-function genDemo(ind,years=15){const d=[];const now=new Date();const m=years*12;const isQ=["GDP","JP_GDP","EU_GDP","IN_GDP"].includes(ind);const isD=["DGS10","DGS2","T10Y2Y","VIX","SP500","GSPC","JP_USDJPY","BITCOIN","HYSPREAD","EURUSD","IN_USDINR","GOLD","OIL_WTI"].includes(ind);const isW=ind==="ICSA";const step=isQ?3:1;const total=isD?years*252:m;
+function genDemo(ind,years=15){const d=[];const now=new Date();const m=years*12;const isQ=["GDP","JP_GDP","EU_GDP"].includes(ind);const isD=["DGS10","DGS2","T10Y2Y","VIX","SP500","GSPC","JP_USDJPY","BITCOIN","HYSPREAD","EURUSD","IN_USDINR","OIL_WTI"].includes(ind);const isW=ind==="ICSA";const step=isQ?3:1;const total=isD?years*252:m;
 for(let i=total;i>=0;i-=step){const date=isD?new Date(now.getTime()-i*864e5*1.4):new Date(now.getFullYear(),now.getMonth()-i,1);if(isD&&(date.getDay()===0||date.getDay()===6))continue;let v;const t=(total-i)/total;
 switch(ind){
 case"NFP":v=140000+t*18000+Math.sin(t*20)*2000+(Math.random()-.5)*1500;break;
@@ -131,17 +128,14 @@ case"JP_EXPORT":v=55000+t*25000+Math.sin(t*12)*5000+(Math.random()-.5)*2000;brea
 case"JP_IMPORT":v=50000+t*25000+Math.sin(t*10)*6000+(Math.random()-.5)*2500;break;
 // ── ユーロ圏 ──
 case"EU_ECB":if(t<.5)v=-.5+(Math.random()-.5)*.05;else if(t<.7)v=(t-.5)*20;else if(t<.85)v=4;else v=4-(t-.85)*15;v=Math.round(v*100)/100;v=Math.max(-.5,v);break;
-case"EU_CPI":v=88+t*40+Math.sin(t*8)*2+(Math.random()-.5)*1.5;break;
 case"EU_UNRATE":v=11-t*4+Math.sin(t*10)*1.5+(Math.random()-.5)*.3;v=Math.max(6,v);break;
 case"EURUSD":v=1.1+Math.sin(t*15)*.12+(Math.random()-.5)*.02;v=Math.max(1.0,Math.min(1.25,v));break;
 case"EU_GDP":v=2500000+t*600000+Math.sin(t*6)*50000+(Math.random()-.5)*20000;if(t>.3&&t<.35)v*=.95;break;
 // ── インド ──
 case"IN_USDINR":v=65+t*20+Math.sin(t*10)*3+(Math.random()-.5)*.5;v=Math.max(60,Math.min(88,v));break;
 case"IN_CPI":v=115+t*55+Math.sin(t*8)*5+(Math.random()-.5)*3;break;
-case"IN_GDP":v=25000000+t*35000000+Math.sin(t*6)*2000000+(Math.random()-.5)*1000000;break;
 case"IN_RATE":if(t<.3)v=8-(t*10);else if(t<.5)v=4+(Math.random()-.5)*.1;else if(t<.7)v=4+t*3;else v=6.5-(t-.7)*5;v=Math.round(v*100)/100;v=Math.max(4,Math.min(9,v));break;
 // ── コモディティ追加 ──
-case"GOLD":v=1100+t*1700+Math.sin(t*15)*150+(Math.random()-.5)*60;if(t>.8)v+=300;break;
 case"OIL_WTI":v=40+t*60+Math.sin(t*20)*25+(Math.random()-.5)*8;if(t>.3&&t<.35)v*=.5;v=Math.max(20,v);break;
 case"NATGAS":v=2+Math.sin(t*25)*2.5+(Math.random()-.5)*.5;v=Math.max(1.5,v);break;
 case"WHEAT":v=180+t*100+Math.sin(t*15)*60+(Math.random()-.5)*20;if(t>.55&&t<.65)v+=120;break;
@@ -203,17 +197,14 @@ else if(k==="JP_EXPORT"){if(tr>10){sc+=15;reasons.push("輸出急増");}else if(
 else if(k==="JP_IMPORT"){if(tr>10){sc-=5;reasons.push("輸入急増: コスト増");}else if(tr>0){sc+=3;reasons.push("輸入増加: 内需あり");}else{sc-=5;reasons.push("輸入減少: 内需低下");}}
 // ── ユーロ圏 ──
 else if(k==="EU_ECB"){if(lt<0){sc+=10;reasons.push("マイナス金利: 緩和的");}else if(lt<1){sc+=5;reasons.push("超低金利");}else if(lt<3){sc-=5;reasons.push("利上げ局面");}else{sc-=15;reasons.push("高金利: 景気抑制");}if(mom<0){sc+=10;reasons.push("利下げ中");}}
-else if(k==="EU_CPI"){const yoy=data.length>12?((lt-data[data.length-13].value)/data[data.length-13].value)*100:tr;if(yoy>4){sc-=20;reasons.push("YoY "+yoy.toFixed(1)+"%: 高インフレ");}else if(yoy>2.5){sc-=8;reasons.push("YoY "+yoy.toFixed(1)+"%: やや高め");}else if(yoy>=1.5){sc+=15;reasons.push("YoY "+yoy.toFixed(1)+"%: 目標圏内");}else{sc+=5;reasons.push("YoY "+yoy.toFixed(1)+"%: 低インフレ");}}
 else if(k==="EU_UNRATE"){if(lt<7){sc+=15;reasons.push(lt.toFixed(1)+"%: 低水準");}else if(lt<8.5){sc+=5;reasons.push(lt.toFixed(1)+"%: 改善");}else if(lt<10){sc-=8;reasons.push(lt.toFixed(1)+"%: 高め");}else{sc-=20;reasons.push(lt.toFixed(1)+"%: 高失業率");}if(mom<0){sc+=8;reasons.push("低下中");}}
 else if(k==="EURUSD"){if(tr>5){sc+=8;reasons.push("ユーロ高進行");}else if(tr>0){sc+=4;reasons.push("ユーロ安定");}else if(tr>-5){sc-=4;reasons.push("ユーロ軟調");}else{sc-=10;reasons.push("ユーロ急落");}}
 else if(k==="EU_GDP"){if(tr>2){sc+=20;reasons.push("堅調成長");}else if(tr>0){sc+=10;reasons.push("緩やか成長");}else{sc-=25;reasons.push("縮小リスク");}}
 // ── インド ──
 else if(k==="IN_USDINR"){if(tr>5){sc-=10;reasons.push("ルピー急落: 資本流出懸念");}else if(tr>2){sc-=5;reasons.push("ルピー下落");}else if(tr>-2){sc+=3;reasons.push("ルピー安定");}else{sc+=8;reasons.push("ルピー上昇");}}
 else if(k==="IN_CPI"){const yoy=data.length>12?((lt-data[data.length-13].value)/data[data.length-13].value)*100:tr;if(yoy>6){sc-=20;reasons.push("YoY "+yoy.toFixed(1)+"%: 高インフレ");}else if(yoy>4){sc-=5;reasons.push("YoY "+yoy.toFixed(1)+"%: 目標上限付近");}else if(yoy>=2){sc+=15;reasons.push("YoY "+yoy.toFixed(1)+"%: 目標圏内");}else{sc+=3;reasons.push("YoY "+yoy.toFixed(1)+"%: 低インフレ");}}
-else if(k==="IN_GDP"){if(tr>6){sc+=25;reasons.push("高成長: 世界トップ級");}else if(tr>4){sc+=15;reasons.push("堅調成長");}else if(tr>2){sc+=5;reasons.push("緩やか成長");}else{sc-=20;reasons.push("成長鈍化");}}
 else if(k==="IN_RATE"){if(lt<5){sc+=15;reasons.push(lt.toFixed(2)+"%: 低金利・緩和的");}else if(lt<6.5){sc+=5;reasons.push(lt.toFixed(2)+"%: 正常圏");}else{sc-=15;reasons.push(lt.toFixed(2)+"%: 高金利・引締め");}if(mom<0){sc+=10;reasons.push("利下げ中");}}
 // ── コモディティ追加 ──
-else if(k==="GOLD"){if(tr>15){sc+=15;reasons.push("金急騰: リスクオフ・インフレ警戒");}else if(tr>5){sc+=8;reasons.push("金上昇: 安全資産需要");}else if(tr>-5){sc+=3;reasons.push("金安定");}else{sc-=10;reasons.push("金下落: リスクオン");}}
 else if(k==="OIL_WTI"){if(lt>90){sc-=15;reasons.push(lt.toFixed(0)+"$: インフレ圧力");}else if(lt>70){sc-=5;reasons.push(lt.toFixed(0)+"$: やや高め");}else if(lt>50){sc+=5;reasons.push(lt.toFixed(0)+"$: 適正");}else{sc-=10;reasons.push(lt.toFixed(0)+"$: 低迷: 景気懸念");}if(tr>20){sc-=10;reasons.push("原油急騰");}}
 else if(k==="NATGAS"){if(lt>5){sc-=15;reasons.push(lt.toFixed(2)+"$: 高騰");}else if(lt>3){sc-=5;reasons.push(lt.toFixed(2)+"$: やや高め");}else{sc+=5;reasons.push(lt.toFixed(2)+"$: 安定");}}
 else if(k==="WHEAT"){if(tr>20){sc-=10;reasons.push("小麦急騰: 食料インフレ");}else if(tr>5){sc-=5;reasons.push("小麦上昇");}else if(tr>-5){sc+=3;reasons.push("小麦安定");}else{sc+=5;reasons.push("小麦下落: 食料コスト低下");}}
@@ -355,6 +346,22 @@ return(<div style={{position:"relative"}} onMouseEnter={()=>setHov(true)} onMous
 </div>}
 </div>);}
 
+// ─── RSS NEWS ────────────────────────────────────────────────────────────
+const NEWS_SOURCES=[
+  {key:'reuters',label:'Reuters',color:'#FF8000',url:'https://feeds.reuters.com/reuters/JPTopNews'},
+  {key:'bloomberg',label:'Bloomberg',color:'#1B6EC2',url:'https://www.bloomberg.co.jp/feeds/news'},
+];
+async function fetchRSS(url,source){
+  const r=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent(url),{signal:AbortSignal.timeout(8000)});
+  const j=await r.json();
+  const doc=new DOMParser().parseFromString(j.contents,'text/xml');
+  return Array.from(doc.querySelectorAll('item')).slice(0,8).map(el=>{
+    const txt=tag=>el.querySelector(tag)?.textContent?.trim()||'';
+    const link=txt('link')||el.getElementsByTagName('link')[0]?.getAttribute('href')||'';
+    return{title:txt('title'),link,pubDate:txt('pubDate')||txt('dc\\:date')||'',source};
+  }).filter(i=>i.title);
+}
+
 // ─── MATRIX LAYOUT ───────────────────────────────────────────────────────
 const MATRIX_COLS=[
   {id:'employment',label:'👷 雇用'},
@@ -371,7 +378,7 @@ const MATRIX_ROWS=[
     policy:['FEDFUNDS','M2SL'],
     economy:['GDP','ISM','RETAIL','UMCSENT','HOUST','CSUSHPISA','INDPRO'],
     market:['DGS10','DGS2','T10Y2Y','VIX','SP500','GSPC','MORTGAGE30','HYSPREAD'],
-    commodity:['COPPER','BITCOIN','GOLD','OIL_WTI','NATGAS','WHEAT'],
+    commodity:['COPPER','BITCOIN','OIL_WTI','NATGAS','WHEAT'],
   }},
   {id:'jp',label:'🇯🇵 日本',keys:{
     employment:['JP_UNRATE'],
@@ -383,9 +390,9 @@ const MATRIX_ROWS=[
   }},
   {id:'other',label:'🌍 その他',keys:{
     employment:['EU_UNRATE'],
-    inflation:['EU_CPI','IN_CPI'],
+    inflation:['IN_CPI'],
     policy:['EU_ECB','IN_RATE'],
-    economy:['EU_GDP','IN_GDP'],
+    economy:['EU_GDP'],
     market:['EURUSD','IN_USDINR'],
     commodity:[],
   }},
@@ -412,9 +419,25 @@ export default function App(){
   const [tweetEdits,setTweetEdits]=useState({});
   const [tweetSeed,setTweetSeed]=useState(0);
   const tweetHistory=useRef({});
+  const [newsItems,setNewsItems]=useState([]);
+  const [newsLoading,setNewsLoading]=useState(false);
+  const [newsUpdated,setNewsUpdated]=useState(null);
   const [forceDual,setForceDual]=useState(false);
   useEffect(()=>setForceDual(false),[ci]);
   useEffect(()=>setTweetSeed(s=>s+1),[sel]);
+
+  const fetchAllNews=useCallback(async()=>{
+    setNewsLoading(true);
+    try{
+      const results=await Promise.allSettled(NEWS_SOURCES.map(s=>fetchRSS(s.url,s.label)));
+      const items=results.flatMap((r,i)=>r.status==='fulfilled'?r.value.map(n=>({...n,sourceColor:NEWS_SOURCES[i].color})):[])
+        .sort((a,b)=>new Date(b.pubDate)-new Date(a.pubDate));
+      setNewsItems(items);
+      setNewsUpdated(new Date());
+    }catch(e){console.error('news fetch error',e);}
+    finally{setNewsLoading(false);}
+  },[]);
+  useEffect(()=>{fetchAllNews();const t=setInterval(fetchAllNews,10*60*1000);return()=>clearInterval(t);},[fetchAllNews]);
 
   // Load demo data
   useEffect(()=>{const d={};Object.keys(INDICATORS).forEach(k=>{d[k]=genDemo(k,15);});setAd(d);
@@ -660,6 +683,40 @@ export default function App(){
         <div style={{flex:1}}><p style={{color:"#ccc",fontSize:11,fontWeight:600,margin:0}}>{ev.name}</p><p style={{color:"#555",fontSize:8,margin:"1px 0 0",fontFamily:"monospace"}}>{ev.date}</p></div>
         <span style={{padding:"1px 5px",borderRadius:3,fontSize:8,fontWeight:700,fontFamily:"monospace",background:ev.imp==="高"?"#E8453C18":"#F5A62318",color:ev.imp==="高"?"#E8453C":"#F5A623"}}>{ev.imp}</span>
       </div>))}
+    </div>
+  </div>
+
+  {/* NEWS */}
+  <div style={{background:"rgba(255,255,255,.02)",border:"1px solid rgba(255,255,255,.05)",borderRadius:14,padding:"12px 14px",marginBottom:10}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+      <h3 style={{fontSize:13,fontWeight:700,margin:0,color:"#ccc"}}>📰 経済ニュース
+        <span style={{color:"#444",fontSize:9,fontWeight:400,fontFamily:"monospace",marginLeft:8}}>10分ごとに自動更新</span>
+      </h3>
+      <div style={{display:"flex",alignItems:"center",gap:8}}>
+        {newsUpdated&&<span style={{color:"#444",fontSize:8,fontFamily:"monospace"}}>{newsUpdated.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})} 更新</span>}
+        <button onClick={fetchAllNews} disabled={newsLoading} style={{background:"transparent",border:"1px solid rgba(255,255,255,.08)",borderRadius:5,padding:"3px 8px",color:newsLoading?"#444":"#888",fontSize:9,cursor:"pointer",fontFamily:"monospace"}}>{newsLoading?"読込中…":"↻ 更新"}</button>
+      </div>
+    </div>
+    {newsItems.length===0&&!newsLoading&&<p style={{color:"#444",fontSize:10,fontFamily:"monospace",margin:0}}>ニュースを読み込み中... (CORS プロキシ経由)</p>}
+    <div style={{display:"flex",flexDirection:"column",gap:5}}>
+      {newsItems.map((item,i)=>(
+        <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"8px 10px",background:"rgba(255,255,255,.015)",borderRadius:8,borderLeft:"3px solid "+item.sourceColor}}>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}>
+              <span style={{background:item.sourceColor+"20",color:item.sourceColor,fontSize:8,fontWeight:700,fontFamily:"monospace",padding:"1px 5px",borderRadius:3,whiteSpace:"nowrap"}}>{item.source}</span>
+              {item.pubDate&&<span style={{color:"#444",fontSize:8,fontFamily:"monospace",whiteSpace:"nowrap"}}>{(()=>{try{const d=new Date(item.pubDate);return d.toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return '';}})()}</span>}
+            </div>
+            <a href={item.link||'#'} target="_blank" rel="noopener noreferrer" style={{color:"#ccc",fontSize:12,fontWeight:500,textDecoration:"none",lineHeight:1.5,display:"block"}}
+              onMouseEnter={e=>e.target.style.color='#e8e8e8'} onMouseLeave={e=>e.target.style.color='#ccc'}>
+              {item.title}
+            </a>
+          </div>
+          <button onClick={()=>window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(item.title+(item.link?' '+item.link:'')),'_blank')}
+            style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:5,padding:"4px 7px",color:"#888",fontSize:10,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,fontFamily:"monospace"}}>
+            𝕏 ポスト
+          </button>
+        </div>
+      ))}
     </div>
   </div>
 
