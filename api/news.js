@@ -39,6 +39,16 @@ export default async function handler(req, res) {
       color: '#0099CC',
       url: 'https://diamond.jp/list/feed/rss/dol',
     },
+    {
+      label: 'Yahoo!経済',
+      color: '#FF0033',
+      url: 'https://news.yahoo.co.jp/rss/topics/business.xml',
+    },
+    {
+      label: 'ITmedia',
+      color: '#00AADD',
+      url: 'https://rss.itmedia.co.jp/rss/2.0/news_bursts.xml',
+    },
   ];
 
   try {
