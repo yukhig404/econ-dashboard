@@ -269,6 +269,8 @@ export default function App(){
   const [catFilter,setCatFilter]=useState("all");
   const [fetchProgress,setFetchProgress]=useState("");
   const [tweetEdits,setTweetEdits]=useState({});
+  const [forceDual,setForceDual]=useState(false);
+  useEffect(()=>setForceDual(false),[ci]);
 
   // Load demo data
   useEffect(()=>{const d={};Object.keys(INDICATORS).forEach(k=>{d[k]=genDemo(k,15);});setAd(d);
@@ -315,6 +317,7 @@ export default function App(){
 
   const cpd=useMemo(()=>{if(vw!==VS.C)return[];const arrs=ci.map(k=>gf(k));const dates=arrs.reduce((l,a)=>a.length>l.length?a:l,[]).map(d=>d.date);return dates.map(date=>{const pt={date};ci.forEach((k,ki)=>{const arr=arrs[ki];let match=null;for(let j=arr.length-1;j>=0;j--){if(arr[j].date<=date){match=arr[j];break;}}pt[k]=match?match.value:null;});return pt;});},[vw,ci,gf]);
   const sharedAxis=useMemo(()=>{if(ci.length<2)return false;const d0=gf(ci[0]),d1=gf(ci[1]);if(!d0.length||!d1.length)return false;const m0=Math.max(...d0.map(d=>Math.abs(d.value)));const m1=Math.max(...d1.map(d=>Math.abs(d.value)));if(!m0||!m1)return false;return Math.max(m0,m1)/Math.min(m0,m1)<5;},[ci,gf]);
+  const effectiveShared=sharedAxis&&!forceDual;
 
   const filteredInds=useMemo(()=>{if(catFilter==="all")return Object.keys(INDICATORS);return Object.entries(INDICATORS).filter(([k,v])=>v.cat===catFilter).map(([k])=>k);},[catFilter]);
 
@@ -434,27 +437,30 @@ export default function App(){
   {vw===VS.C&&(<div style={{background:"rgba(255,255,255,.02)",border:"1px solid rgba(255,255,255,.05)",borderRadius:14,padding:"14px 10px",marginBottom:10}}>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8,flexWrap:"wrap",gap:6}}>
       <h3 style={{fontSize:13,fontWeight:700,margin:0,color:"#ccc"}}>オーバーレイ比較 <span style={{color:"#555",fontSize:10,fontWeight:400}}>（実値・左右軸）</span></h3>
-      {ci.length>0&&<button onClick={()=>setCi([])} style={{background:"transparent",border:"1px solid rgba(255,255,255,.08)",borderRadius:5,padding:"3px 8px",color:"#555",fontSize:9,cursor:"pointer",fontFamily:"monospace"}}>クリア</button>}
+      <div style={{display:"flex",gap:5,alignItems:"center"}}>
+        {ci.length===2&&sharedAxis&&<button onClick={()=>setForceDual(p=>!p)} style={{background:forceDual?"rgba(255,200,50,.08)":"transparent",border:"1px solid "+(forceDual?"rgba(255,200,50,.3)":"rgba(255,255,255,.08)"),borderRadius:5,padding:"3px 8px",color:forceDual?"#F5C842":"#555",fontSize:9,cursor:"pointer",fontFamily:"monospace"}}>{forceDual?"自動に戻す":"右軸に分離"}</button>}
+        {ci.length>0&&<button onClick={()=>setCi([])} style={{background:"transparent",border:"1px solid rgba(255,255,255,.08)",borderRadius:5,padding:"3px 8px",color:"#555",fontSize:9,cursor:"pointer",fontFamily:"monospace"}}>クリア</button>}
+      </div>
     </div>
     <div style={{display:"flex",gap:5,marginBottom:10,flexWrap:"wrap",minHeight:24,alignItems:"center"}}>
       {ci.length===0
         ? <span style={{color:"#444",fontSize:9,fontFamily:"monospace"}}>↑ 上のカードから2つ選択してください</span>
         : <>
-          {ci.map((k,idx)=>{const i2=INDICATORS[k];const axisLabel=ci.length<2?"":sharedAxis?"共通軸":idx===0?"左軸":"右軸";return(<span key={k} style={{display:"inline-flex",alignItems:"center",gap:4,background:i2.color+"18",border:"1px solid "+i2.color+"40",borderRadius:20,padding:"2px 8px 2px 10px",fontSize:10,color:i2.color,fontWeight:600}}>
+          {ci.map((k,idx)=>{const i2=INDICATORS[k];const axisLabel=ci.length<2?"":effectiveShared?"共通軸":idx===0?"左軸":"右軸";return(<span key={k} style={{display:"inline-flex",alignItems:"center",gap:4,background:i2.color+"18",border:"1px solid "+i2.color+"40",borderRadius:20,padding:"2px 8px 2px 10px",fontSize:10,color:i2.color,fontWeight:600}}>
               {axisLabel&&<span style={{color:i2.color+"88",fontSize:8}}>{axisLabel}</span>} {i2.name}
               <button onClick={()=>setCi(p=>p.filter(x=>x!==k))} style={{background:"transparent",border:"none",color:i2.color+"99",fontSize:11,cursor:"pointer",padding:0,lineHeight:1,fontWeight:700}}>×</button>
             </span>);})}
-          {ci.length===2&&<span style={{color:"#444",fontSize:9,fontFamily:"monospace",marginLeft:4}}>{sharedAxis?"· 同スケールのため共通軸":"· スケール差大のため左右軸"}</span>}
+          {ci.length===2&&<span style={{color:"#444",fontSize:9,fontFamily:"monospace",marginLeft:4}}>{effectiveShared?"· 同スケールのため共通軸":forceDual?"· 右軸に分離中（手動）":"· スケール差大のため左右軸"}</span>}
         </>}
     </div>
-    <div style={{width:"100%",height:300}}><ResponsiveContainer><LineChart data={cpd} margin={{top:5,right:(!sharedAxis&&ci.length>1)?55:10,left:0,bottom:0}}>
+    <div style={{width:"100%",height:300}}><ResponsiveContainer><LineChart data={cpd} margin={{top:5,right:(!effectiveShared&&ci.length>1)?55:10,left:0,bottom:0}}>
       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,.03)"/>
       <XAxis dataKey="date" tick={{fill:"#888",fontSize:9,fontFamily:"monospace"}} tickFormatter={fa} stroke="rgba(255,255,255,.04)" interval="preserveStartEnd" minTickGap={40}/>
-      <YAxis yAxisId="left" orientation="left" tick={{fill:ci[0]?(sharedAxis?"#888":INDICATORS[ci[0]].color+"cc"):"#888",fontSize:9,fontFamily:"monospace"}} stroke="rgba(255,255,255,.04)" tickFormatter={fv} width={50} domain={["auto","auto"]}/>
-      {ci.length>1&&!sharedAxis&&<YAxis yAxisId="right" orientation="right" tick={{fill:INDICATORS[ci[1]].color+"cc",fontSize:9,fontFamily:"monospace"}} stroke="rgba(255,255,255,.04)" tickFormatter={fv} width={50} domain={["auto","auto"]}/>}
+      <YAxis yAxisId="left" orientation="left" tick={{fill:ci[0]?(effectiveShared?"#888":INDICATORS[ci[0]].color+"cc"):"#888",fontSize:9,fontFamily:"monospace"}} stroke="rgba(255,255,255,.04)" tickFormatter={fv} width={50} domain={["auto","auto"]}/>
+      {ci.length>1&&!effectiveShared&&<YAxis yAxisId="right" orientation="right" tick={{fill:INDICATORS[ci[1]].color+"cc",fontSize:9,fontFamily:"monospace"}} stroke="rgba(255,255,255,.04)" tickFormatter={fv} width={50} domain={["auto","auto"]}/>}
       <Tooltip content={({active,payload,label})=>{if(!active||!payload?.length)return null;return(<div style={{background:"rgba(10,10,15,.96)",border:"1px solid rgba(255,255,255,.1)",borderRadius:8,padding:"8px 12px"}}><p style={{color:"#666",fontSize:10,margin:0,fontFamily:"monospace"}}>{label}</p>{payload.map((p,i)=>{const ind=INDICATORS[p.dataKey];return(<p key={i} style={{color:p.color,fontSize:11,fontWeight:700,margin:"2px 0 0",fontFamily:"monospace"}}>{ind?.name}: {p.value?.toLocaleString(undefined,{maximumFractionDigits:2})} <span style={{color:"#555",fontWeight:400}}>{ind?.unit}</span></p>);})}</div>);}}/>
       {ci[0]&&<Line yAxisId="left" type="monotone" dataKey={ci[0]} stroke={INDICATORS[ci[0]].color} strokeWidth={2} dot={false} name={INDICATORS[ci[0]].name}/>}
-      {ci[1]&&<Line yAxisId={sharedAxis?"left":"right"} type="monotone" dataKey={ci[1]} stroke={INDICATORS[ci[1]].color} strokeWidth={2} dot={false} name={INDICATORS[ci[1]].name}/>}
+      {ci[1]&&<Line yAxisId={effectiveShared?"left":"right"} type="monotone" dataKey={ci[1]} stroke={INDICATORS[ci[1]].color} strokeWidth={2} dot={false} name={INDICATORS[ci[1]].name}/>}
       <Legend formatter={v=>INDICATORS[v]?.name||v} wrapperStyle={{fontSize:9,fontFamily:"monospace"}}/>
     </LineChart></ResponsiveContainer></div>
   </div>)}
