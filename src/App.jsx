@@ -31,6 +31,7 @@ const INDICATORS = {
   T10Y2Y:{id:"T10Y2Y",name:"イールドカーブ(米)",nameEn:"10Y-2Y Spread",unit:"%",color:"#8E44AD",cat:"market",freq:"日次",desc:"逆イールド（マイナス）はリセッション予兆として有名。",impact:"逆転→リセッション警告→リスクオフ",nextRel:"-",relName:"-"},
   VIX:{id:"VIXCLS",name:"VIX恐怖指数",nameEn:"VIX",unit:"指数",color:"#E74C3C",cat:"market",freq:"日次",desc:"S&P500オプションから算出。市場の恐怖度を数値化。",impact:"VIX上昇→不安増大→株安",nextRel:"-",relName:"-"},
   SP500:{id:"NASDAQCOM",name:"NASDAQ総合(米)",nameEn:"NASDAQ Composite",unit:"指数",color:"#9B59B6",cat:"market",freq:"日次",desc:"NASDAQ上場全銘柄の時価総額加重指数。テック株の動向を反映。",impact:"主要指標の結果を最も直接的に反映",nextRel:"-",relName:"-"},
+  GSPC:{id:"SP500",name:"S&P500(米)",nameEn:"S&P 500",unit:"指数",color:"#7D3C98",cat:"market",freq:"日次",desc:"米国を代表する500社の株価指数。米国株市場全体の動向を最も広く反映。",impact:"上昇→リスクオン・景気楽観 / 下落→リスクオフ",nextRel:"-",relName:"-"},
   JP_UNRATE:{id:"LRUNTTTTJPM156S",name:"失業率(日)",nameEn:"Japan Unemployment",unit:"%",color:"#BC002D",cat:"japan",freq:"月次",desc:"日本の完全失業率。総務省統計局発表。",impact:"失業率低下→消費改善→景気好転",nextRel:"2026-03-28",relName:"労働力調査"},
   JP_CPI:{id:"JPNCPIALLMINMEI",name:"CPI(日)",nameEn:"Japan CPI",unit:"指数",color:"#E85555",cat:"japan",freq:"月次",desc:"日本の消費者物価指数。日銀の2%目標の達成状況を示す。",impact:"CPI上昇→日銀利上げ圧力→円高",nextRel:"2026-03-20",relName:"消費者物価"},
   JP_BOJ:{id:"IRSTCI01JPM156N",name:"日銀政策金利",nameEn:"BOJ Rate",unit:"%",color:"#4A90D9",cat:"japan",freq:"月次",desc:"日本銀行が決定する政策金利。長らくゼロ・マイナス金利を維持。",impact:"利上げ→円高・株安圧力",nextRel:"2026-03-18",relName:"日銀会合"},
@@ -51,7 +52,7 @@ const VS={S:"single",M:"multi",C:"compare",T:"table"};
 const SL={BULLISH:{label:"強気",emoji:"🟢",color:"#7ED321",bg:"#7ED32118"},SLIGHTLY_BULLISH:{label:"やや強気",emoji:"🟡",color:"#B8E986",bg:"#B8E98618"},NEUTRAL:{label:"中立",emoji:"⚪",color:"#888",bg:"#88888818"},SLIGHTLY_BEARISH:{label:"やや弱気",emoji:"🟠",color:"#F5A623",bg:"#F5A62318"},BEARISH:{label:"弱気",emoji:"🔴",color:"#E8453C",bg:"#E8453C18"}};
 
 // ─── DEMO DATA ──────────────────────────────────────────────────────────
-function genDemo(ind,years=15){const d=[];const now=new Date();const m=years*12;const isQ=ind==="GDP"||ind==="JP_GDP";const isD=["DGS10","DGS2","T10Y2Y","VIX","SP500","JP_USDJPY","BITCOIN"].includes(ind);const isW=ind==="ICSA";const step=isQ?3:1;const total=isD?years*252:m;
+function genDemo(ind,years=15){const d=[];const now=new Date();const m=years*12;const isQ=ind==="GDP"||ind==="JP_GDP";const isD=["DGS10","DGS2","T10Y2Y","VIX","SP500","GSPC","JP_USDJPY","BITCOIN"].includes(ind);const isW=ind==="ICSA";const step=isQ?3:1;const total=isD?years*252:m;
 for(let i=total;i>=0;i-=step){const date=isD?new Date(now.getTime()-i*864e5*1.4):new Date(now.getFullYear(),now.getMonth()-i,1);if(isD&&(date.getDay()===0||date.getDay()===6))continue;let v;const t=(total-i)/total;
 switch(ind){
 case"NFP":v=140000+t*18000+Math.sin(t*20)*2000+(Math.random()-.5)*1500;break;
@@ -69,6 +70,7 @@ case"DGS2":v=1+t*3.5+Math.sin(t*20)*.6+(Math.random()-.5)*.15;v=Math.max(.1,v);b
 case"T10Y2Y":v=1.5-t*2+Math.sin(t*15)*.4+(Math.random()-.5)*.1;break;
 case"VIX":v=18+Math.sin(t*25)*6+(Math.random()-.5)*4;if(t>.3&&t<.35)v+=20;v=Math.max(10,v);break;
 case"SP500":v=2800+t*3200+Math.sin(t*15)*200+(Math.random()-.5)*100;if(t>.3&&t<.35)v*=.85;break;
+case"GSPC":v=1200+t*4600+Math.sin(t*15)*300+(Math.random()-.5)*120;if(t>.3&&t<.35)v*=.85;break;
 case"JP_UNRATE":v=2.8+Math.sin(t*8)*.8+(t>.3&&t<.4?.8:0)+(Math.random()-.5)*.15;v=Math.max(2.2,v);break;
 case"JP_CPI":v=98+t*12+Math.sin(t*8)*1+(Math.random()-.5)*.8;break;
 case"JP_BOJ":if(t<.6)v=-.1+(Math.random()-.5)*.05;else if(t<.75)v=.1+(t-.6)*.5;else v=.5+(t-.75)*1.5;v=Math.round(v*100)/100;v=Math.max(-.1,v);break;
@@ -111,7 +113,7 @@ else if(k==="DGS10"){if(lt>4.5){sc-=10;reasons.push(lt.toFixed(2)+"%: 株に逆�
 else if(k==="DGS2"){if(lt>4.5){sc-=8;reasons.push("短期金利高");}else{sc+=5;reasons.push("短期金利正常");}}
 else if(k==="T10Y2Y"){if(lt<0){sc-=20;reasons.push("逆イールド⚠");}else if(lt<0.5){sc-=5;reasons.push("フラット化");}else{sc+=10;reasons.push("正常カーブ");}}
 else if(k==="VIX"){if(lt>30){sc-=20;reasons.push(lt.toFixed(0)+": 高恐怖");}else if(lt>20){sc-=5;reasons.push(lt.toFixed(0)+": やや不安");}else{sc+=15;reasons.push(lt.toFixed(0)+": 安定");}}
-else if(k==="SP500"){if(tr>10){sc+=15;reasons.push("強い上昇");}else if(tr>0){sc+=8;reasons.push("上昇基調");}else{sc-=15;reasons.push("下落基調");}}
+else if(k==="SP500"||k==="GSPC"){if(tr>10){sc+=15;reasons.push("強い上昇");}else if(tr>0){sc+=8;reasons.push("上昇基調");}else{sc-=15;reasons.push("下落基調");}}
 else if(k==="JP_UNRATE"){if(lt<2.5){sc+=15;reasons.push(lt.toFixed(1)+"%: 低水準");}else if(lt<3){sc+=8;reasons.push(lt.toFixed(1)+"%: 正常圏");}else{sc-=15;reasons.push(lt.toFixed(1)+"%: やや高め");}if(mom>0){sc-=8;reasons.push("上昇中");}else if(mom<0){sc+=8;reasons.push("低下中");}}
 else if(k==="JP_CPI"){const yoy=data.length>12?((lt-data[data.length-13].value)/data[data.length-13].value)*100:tr;if(yoy>3){sc-=15;reasons.push("YoY "+yoy.toFixed(1)+"%: 高インフレ");}else if(yoy>=1.5){sc+=15;reasons.push("YoY "+yoy.toFixed(1)+"%: 目標圏内");}else{sc-=5;reasons.push("YoY "+yoy.toFixed(1)+"%: 低インフレ");}}
 else if(k==="JP_BOJ"){if(lt<0){sc+=10;reasons.push("マイナス金利");}else if(lt<0.5){sc+=5;reasons.push("超低金利");}else{sc-=10;reasons.push("利上げ局面");}if(mom>0){sc-=10;reasons.push("利上げ中");}}
