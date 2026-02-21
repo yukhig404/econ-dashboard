@@ -551,7 +551,7 @@ export default function App(){
         </div>
         {MATRIX_ROWS.map(row=>(
           <div key={row.id} style={{display:"grid",gridTemplateColumns:"56px repeat(6,1fr)",gap:3,marginBottom:3,alignItems:"stretch"}}>
-            <div style={{display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(255,255,255,.025)",borderRadius:8,padding:"4px 2px",fontSize:9,fontWeight:700,color:"#999",textAlign:"center",writingMode:"vertical-rl",transform:"rotate(180deg)",letterSpacing:".06em"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(255,255,255,.025)",borderRadius:8,padding:"4px 2px",fontSize:9,fontWeight:700,color:"#999",textAlign:"center",writingMode:"vertical-rl",letterSpacing:".06em"}}>
               {row.label}
             </div>
             {MATRIX_COLS.map(col=>{const keys=row.keys[col.id]||[];return(
