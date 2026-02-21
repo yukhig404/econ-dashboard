@@ -49,6 +49,16 @@ export default async function handler(req, res) {
       color: '#00AADD',
       url: 'https://rss.itmedia.co.jp/rss/2.0/news_bursts.xml',
     },
+    {
+      label: 'EE Times',
+      color: '#00AADD',
+      url: 'https://rss.itmedia.co.jp/rss/2.0/eetimes.xml',
+    },
+    {
+      label: 'AI+',
+      color: '#00AADD',
+      url: 'https://rss.itmedia.co.jp/rss/2.0/aiplus.xml',
+    },
   ];
 
   try {
