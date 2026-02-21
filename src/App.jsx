@@ -346,22 +346,6 @@ return(<div style={{position:"relative"}} onMouseEnter={()=>setHov(true)} onMous
 </div>}
 </div>);}
 
-// ─── RSS NEWS ────────────────────────────────────────────────────────────
-const NEWS_SOURCES=[
-  {key:'reuters',label:'Reuters',color:'#FF8000',url:'https://feeds.reuters.com/reuters/JPTopNews'},
-  {key:'bloomberg',label:'Bloomberg',color:'#1B6EC2',url:'https://www.bloomberg.co.jp/feeds/news'},
-];
-async function fetchRSS(url,source){
-  const r=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent(url),{signal:AbortSignal.timeout(8000)});
-  const j=await r.json();
-  const doc=new DOMParser().parseFromString(j.contents,'text/xml');
-  return Array.from(doc.querySelectorAll('item')).slice(0,8).map(el=>{
-    const txt=tag=>el.querySelector(tag)?.textContent?.trim()||'';
-    const link=txt('link')||el.getElementsByTagName('link')[0]?.getAttribute('href')||'';
-    return{title:txt('title'),link,pubDate:txt('pubDate')||txt('dc\\:date')||'',source};
-  }).filter(i=>i.title);
-}
-
 // ─── MATRIX LAYOUT ───────────────────────────────────────────────────────
 const MATRIX_COLS=[
   {id:'employment',label:'👷 雇用'},
@@ -429,10 +413,9 @@ export default function App(){
   const fetchAllNews=useCallback(async()=>{
     setNewsLoading(true);
     try{
-      const results=await Promise.allSettled(NEWS_SOURCES.map(s=>fetchRSS(s.url,s.label)));
-      const items=results.flatMap((r,i)=>r.status==='fulfilled'?r.value.map(n=>({...n,sourceColor:NEWS_SOURCES[i].color})):[])
-        .sort((a,b)=>new Date(b.pubDate)-new Date(a.pubDate));
-      setNewsItems(items);
+      const r=await fetch('/api/news',{signal:AbortSignal.timeout(15000)});
+      const j=await r.json();
+      setNewsItems(j.items||[]);
       setNewsUpdated(new Date());
     }catch(e){console.error('news fetch error',e);}
     finally{setNewsLoading(false);}
