@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   ReferenceLine, Area, AreaChart, ComposedChart, Bar, Legend
@@ -151,82 +151,96 @@ evs.push({key:"PCE",name:"PCEデフレーター",nameEn:"PCE",date:"2026-02-28",
 return evs.sort((a,b)=>a.days-b.days);}
 
 // ─── TWEET GENERATOR ────────────────────────────────────────────────────
-function genTweets(ad,sigs){
+function genTweets(ad,sigs,history){
   const get=k=>{const d=ad[k];return d?.length>0?d[d.length-1]:null;};
   const getPrev=k=>{const d=ad[k];return d?.length>1?d[d.length-2]:null;};
   const yoy=k=>{const d=ad[k];if(!d||d.length<13)return null;return((d[d.length-1].value-d[d.length-13].value)/d[d.length-13].value*100).toFixed(1);};
   const cap=t=>t.length>140?t.slice(0,139)+'…':t;
   const ts=[];
+  const pick=(key,variants)=>{
+    if(!history[key])history[key]=new Set();
+    let avail=variants.map((_,i)=>i).filter(i=>!history[key].has(i));
+    if(avail.length===0){history[key].clear();avail=variants.map((_,i)=>i);}
+    const idx=avail[Math.floor(Math.random()*avail.length)];
+    history[key].add(idx);return variants[idx];
+  };
 
-  // Tweet 1: Macro big picture — provocative hook
+  // Topic 1: Macro big picture
   const ov=sigs._overall;const ur=get('UNRATE');const ff=get('FEDFUNDS');
   if(ov&&ur&&ff){
     const cy=yoy('CPI');const urV=ur.value.toFixed(1);const ffV=ff.value.toFixed(2);
-    let txt='';
-    if(ov.signal==='BULLISH'||ov.signal==='SLIGHTLY_BULLISH')
-      txt=`【マクロ読解】失業率${urV}%・CPI前年比${cy||'—'}%・FF金利${ffV}%。この組み合わせが示すのは"ゴルディロックス"か"嵐の前の静けさ"か。相場が最も危ないのは全員が楽観的なときだ📡`;
-    else if(ov.signal==='BEARISH'||ov.signal==='SLIGHTLY_BEARISH')
-      txt=`【マクロ警戒】失業率${urV}%・FF金利${ffV}%・CPI前年比${cy||'—'}%。数字は静かにリセッションの足音を刻んでいる。今こそポートフォリオを点検すべきタイミング⚠️`;
-    else
-      txt=`【マクロ中立】FF金利${ffV}%・失業率${urV}%・CPI前年比${cy||'—'}%。強くもなく弱くもないこの局面こそ方向感を掴みにくい。次の相場の引き金を引くのはどのデータか🔍`;
-    ts.push(cap(txt));
+    const bull=ov.signal==='BULLISH'||ov.signal==='SLIGHTLY_BULLISH';
+    const bear=ov.signal==='BEARISH'||ov.signal==='SLIGHTLY_BEARISH';
+    ts.push(cap(pick('macro',[
+      bull?`【マクロ読解】失業率${urV}%・CPI前年比${cy||'—'}%・FF金利${ffV}%。この組み合わせが示すのは"ゴルディロックス"か"嵐の前の静けさ"か。相場が最も危ないのは全員が楽観的なときだ📡`
+          :bear?`【マクロ警戒】失業率${urV}%・FF金利${ffV}%・CPI前年比${cy||'—'}%。数字は静かにリセッションの足音を刻んでいる。今こそポートフォリオを点検すべきタイミング⚠️`
+          :`【マクロ中立】FF金利${ffV}%・失業率${urV}%・CPI前年比${cy||'—'}%。強くもなく弱くもないこの局面こそ方向感を掴みにくい。次の相場の引き金を引くのはどのデータか🔍`,
+      `【景気サイクル診断】失業率${urV}%・FF金利${ffV}%・インフレ${cy||'—'}%。雇用・物価・金利の三角形を見れば今どのフェーズにいるかが分かる。答えを持っている人が市場で勝つ💎`,
+      `【FRBの詰め将棋】FF金利${ffV}%で戦うFRBを前に失業率${urV}%は${parseFloat(urV)<4.5?'まだ底堅い':'崩れ始めた'}。インフレ${cy||'—'}%との綱引きに決着がつく日が近づいている🏛`,
+    ])));
   }
 
-  // Tweet 2: Employment — narrative with market implication
+  // Topic 2: Employment
   const nfp=get('NFP');const nfpP=getPrev('NFP');const urD=get('UNRATE');
   if(nfp&&urD){
     const ch=nfpP?Math.round(nfp.value-nfpP.value):null;
     const chStr=ch!=null?(ch>=0?'+':'')+ch+'千人':'';
-    let txt='';
-    if(urD.value<4)
-      txt=`【雇用強し】失業率${urD.value.toFixed(1)}%・NFP${chStr}。皮肉なことに"強すぎる雇用"がFRBの利下げを阻む。株高を望む市場と戦い続けるパウエルFRB。この緊張感は当面続く🏛`;
-    else
-      txt=`【雇用軟化】失業率${urD.value.toFixed(1)}%・NFP${chStr}。雇用の亀裂が広がり始めた。FRBへの利下げ圧力が高まる一方、"景気後退"の2文字が頭をよぎり始める局面だ⚠️`;
-    ts.push(cap(txt));
+    const jolts=get('JOLTS');
+    ts.push(cap(pick('employment',[
+      urD.value<4
+        ?`【雇用強し】失業率${urD.value.toFixed(1)}%・NFP${chStr}。"強すぎる雇用"がFRBの利下げを阻む。株高を望む市場と戦い続けるパウエルFRB。この緊張感は当面続く🏛`
+        :`【雇用軟化】失業率${urD.value.toFixed(1)}%・NFP${chStr}。雇用の亀裂が広がり始めた。FRBへの利下げ圧力が高まる一方"景気後退"の2文字が頭をよぎる⚠️`,
+      `【労働市場の体温】NFP${chStr}・失業率${urD.value.toFixed(1)}%${jolts?'・求人'+Math.round(jolts.value)+'千件':''}。雇用の温度が資産価格のすべてを決める時代に我々は生きている。この数字から目を離してはいけない👁`,
+      `【NFP解読】非農業部門雇用${chStr}。失業率${urD.value.toFixed(1)}%と合わせると労働市場の${urD.value<4.5?'底堅さが際立つ':'変化点が近づいている'}。次の雇用統計が相場の方向を決める🎯`,
+    ])));
   }
 
-  // Tweet 3: Inflation + Fed — analytical forward look
+  // Topic 3: Inflation + Fed
   const cpi=get('CPI');const ffR=get('FEDFUNDS');
   if(cpi&&ffR){
     const cy=yoy('CPI');const ccy=yoy('CORECPI');const ffV=ffR.value.toFixed(2);
     const cyN=cy?parseFloat(cy):null;
-    let txt='';
-    if(cyN&&cyN>3)
-      txt=`【インフレ警戒】CPI前年比${cy}%はFRBの2%目標をまだ大きく上回る。FF金利${ffV}%高止まりの長期化は必至か。"利下げ期待"で動く投資家が最も痛い目を見やすい環境だ💡`;
-    else if(cyN&&cyN<=2.2)
-      txt=`【利下げ接近】CPI前年比${cy}%まで鈍化。FF金利${ffV}%との組み合わせで実質金利は高水準。利下げサイクルが動き出せば恩恵を受けるのはどのアセットか、今から仕込む価値がある🎯`;
-    else
-      txt=`【インフレ攻防】CPI前年比${cy||'—'}%・コアCPI${ccy||'—'}%。FRBの2%目標まであと一歩の攻防。FF金利${ffV}%の次の動きがすべての答えを持っている。次回FOMCに全集中🏛`;
-    ts.push(cap(txt));
+    ts.push(cap(pick('inflation',[
+      cyN&&cyN>3
+        ?`【インフレ警戒】CPI前年比${cy}%はFRBの2%目標を大きく上回る。FF金利${ffV}%高止まりの長期化は必至か。"利下げ期待"で動く投資家が最も痛い目を見やすい環境💡`
+        :cyN&&cyN<=2.2
+        ?`【利下げ接近】CPI前年比${cy}%まで鈍化。FF金利${ffV}%との組み合わせで実質金利は高水準。利下げサイクルが動き出せば恩恵を受けるアセットを今から仕込む価値がある🎯`
+        :`【インフレ攻防】CPI前年比${cy||'—'}%・コアCPI${ccy||'—'}%。FRBの2%目標まであと一歩。FF金利${ffV}%の次の動きがすべての答えを持っている。次回FOMCに全集中🏛`,
+      `【実質金利の罠】FF金利${ffV}%−CPI${cy||'—'}% = 実質金利${cyN?(ffR.value-cyN).toFixed(2)+'%':'—'}。この水準が続くと借入コスト増で経済に静かなダメージが蓄積する。FRBの転換点を見極めよ🔑`,
+      `【コアCPIに注目】食品・エネルギー除くコアCPI前年比${ccy||'—'}%。FRBが最も注視するこの数字がFF金利${ffV}%の行方を決める。表面のCPIに惑わされず本質を見よ👁`,
+    ])));
   }
 
-  // Tweet 4: Market signals — yield curve + VIX narrative
+  // Topic 4: Market signals
   const t10=get('T10Y2Y');const vx=get('VIX');const d10=get('DGS10');
+  const sp=get('GSPC')||get('SP500');
   if(t10&&vx){
     const ycV=t10.value.toFixed(2);const vxV=vx.value.toFixed(0);const d10V=d10?d10.value.toFixed(2)+'%':'—';
-    let txt='';
-    if(t10.value<-0.1)
-      txt=`【逆イールド警告】10Y-2Y=${ycV}%・VIX${vxV}・10年債${d10V}。過去50年、逆イールドがこれほど長引いてリセッションを回避した例はほぼない。楽観派もこの事実と一度向き合ってほしい📉`;
-    else if(parseFloat(vxV)>25)
-      txt=`【恐怖指数警戒】VIX${vxV}が高止まり。イールドカーブ${ycV}%・10年債${d10V}と合わせると、リスクオフの地合いは簡単には解消しない。VIXスパイクは長期投資家のチャンスでもある🌪`;
-    else
-      txt=`【市場を精読する】イールドカーブ${ycV}%・VIX${vxV}・10年債${d10V}。表面上は落ち着いているが、次のショックの種は静かに育っている。"平和な相場"こそ最大のリスクだ📡`;
-    ts.push(cap(txt));
+    ts.push(cap(pick('market',[
+      t10.value<-0.1
+        ?`【逆イールド警告】10Y-2Y=${ycV}%・VIX${vxV}・10年債${d10V}。過去50年逆イールドがこれほど長引いてリセッションを回避した例はほぼない。楽観派もこの事実と一度向き合ってほしい📉`
+        :parseFloat(vxV)>25
+        ?`【恐怖指数警戒】VIX${vxV}が高止まり。イールドカーブ${ycV}%・10年債${d10V}と合わせると地合いは簡単には解消しない。VIXスパイクは長期投資家のチャンスでもある🌪`
+        :`【市場を精読する】イールドカーブ${ycV}%・VIX${vxV}・10年債${d10V}。表面上は落ち着いているが次のショックの種は静かに育っている。"平和な相場"こそ最大のリスクだ📡`,
+      `【金利市場が語る未来】10年債${d10V}・2-10年スプレッド${ycV}%。債券市場は株式市場より先に答えを知っている。金利の形状変化を見逃した者が転換点に乗り遅れる🎯`,
+      sp?`【株と金利の綱引き】10年債${d10V}・VIX${vxV}。高金利環境でも株価が${sp.value>10000?'高値圏を維持している':'調整局面にある'}現実。バリュエーションと金利の均衡点はどこか💡`
+        :`【リスクの温度計】VIX${vxV}が示す市場心理とイールドカーブ${ycV}%の形状。この2つを読めれば相場の大局は見えてくる🔍`,
+    ])));
   }
 
-  // Tweet 5: Japan — strategic narrative
-  const bj=get('JP_BOJ');const nk=get('JP_NIKKEI');const jgb=get('JP_JGB10');
+  // Topic 5: Japan
+  const bj=get('JP_BOJ');const nk=get('JP_NIKKEI');const jgb=get('JP_JGB10');const jpy=get('JP_USDJPY');
   if(bj){
-    const bjV=bj.value.toFixed(2);
-    const nkStr=nk?Math.round(nk.value).toLocaleString()+'円':'—';
-    const jgbV=jgb?jgb.value.toFixed(2)+'%':'—';
-    const jpCy=yoy('JP_CPI');
-    let txt='';
-    if(bj.value>=0.4)
-      txt=`【日本株の死角】日銀金利${bjV}%・JGB10年${jgbV}・日経${nkStr}。利上げ局面の日本株が直面するのは円高×金利上昇×外需鈍化のトリプル逆風。この嵐を乗り越える銘柄はどこか🇯🇵`;
-    else
-      txt=`【日銀と日本株の方程式】政策金利${bjV}%・JGB${jgbV}・CPI前年比${jpCy||'—'}%。2%目標が視野に入るなかで利上げタイミングを巡る思惑が円・日経・金利を揺さぶり続ける🇯🇵`;
-    ts.push(cap(txt));
+    const bjV=bj.value.toFixed(2);const nkStr=nk?Math.round(nk.value).toLocaleString()+'円':'—';
+    const jgbV=jgb?jgb.value.toFixed(2)+'%':'—';const jpCy=yoy('JP_CPI');const jpyV=jpy?jpy.value.toFixed(2):'—';
+    ts.push(cap(pick('japan',[
+      bj.value>=0.4
+        ?`【日本株の死角】日銀金利${bjV}%・JGB10年${jgbV}・日経${nkStr}。利上げ局面の日本株が直面するのは円高×金利上昇×外需鈍化のトリプル逆風。この嵐を乗り越える銘柄はどこか🇯🇵`
+        :`【日銀と日本株の方程式】政策金利${bjV}%・JGB${jgbV}・CPI前年比${jpCy||'—'}%。2%目標が視野に入るなかで利上げタイミングを巡る思惑が円・日経・金利を揺さぶり続ける🇯🇵`,
+      jpy?`【ドル円が映す真実】ドル円${jpyV}円・日銀金利${bjV}%・日経${nkStr}。円安が続く限り輸出企業は恩恵を受けるが輸入物価上昇が家計を圧迫する。この綱引きに日本経済の行方がかかっている💴`
+         :`【日本の利上げサイクル】日銀政策金利${bjV}%・JGB10年${jgbV}。デフレから抜け出した日本が直面する"普通の金融政策"への移行。金利のある世界への適応が急務だ🏯`,
+      `【外国人が見る日本】日経${nkStr}・JGB${jgbV}・金利${bjV}%。外国人投資家が注目する日本市場の本質は"割安×利上げ×円安修正"のトリプルストーリー。このナラティブが続く間は注目に値する🎌`,
+    ])));
   }
 
   return ts;}
@@ -269,8 +283,11 @@ export default function App(){
   const [catFilter,setCatFilter]=useState("all");
   const [fetchProgress,setFetchProgress]=useState("");
   const [tweetEdits,setTweetEdits]=useState({});
+  const [tweetSeed,setTweetSeed]=useState(0);
+  const tweetHistory=useRef({});
   const [forceDual,setForceDual]=useState(false);
   useEffect(()=>setForceDual(false),[ci]);
+  useEffect(()=>setTweetSeed(s=>s+1),[sel]);
 
   // Load demo data
   useEffect(()=>{const d={};Object.keys(INDICATORS).forEach(k=>{d[k]=genDemo(k,15);});setAd(d);
@@ -308,7 +325,7 @@ export default function App(){
   const gf=useCallback((ind)=>{const raw=ad[ind]||[];const c=new Date();c.setFullYear(c.getFullYear()-tf);return raw.filter(d=>d.date>=c.toISOString().split("T")[0]);},[ad,tf]);
   const sigs=useMemo(()=>analyzeSignals(ad),[ad]);
   const evts=useMemo(()=>getEvents(),[]);
-  const tweets=useMemo(()=>genTweets(ad,sigs),[ad,sigs]);
+  const tweets=useMemo(()=>genTweets(ad,sigs,tweetHistory.current),[ad,sigs,tweetSeed]);// eslint-disable-line
   useEffect(()=>setTweetEdits({}),[tweets]);
   const inf=INDICATORS[sel];
   const cd=gf(sel);
