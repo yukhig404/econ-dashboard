@@ -81,6 +81,7 @@ const INDICATORS = {
 const TFS=[{l:"1Y",y:1},{l:"3Y",y:3},{l:"5Y",y:5},{l:"10Y",y:10},{l:"MAX",y:30}];
 const VS={S:"single",M:"multi",C:"compare",T:"table"};
 const SL={BULLISH:{label:"強気",emoji:"🟢",color:"#7ED321",bg:"#7ED32118"},SLIGHTLY_BULLISH:{label:"やや強気",emoji:"🟡",color:"#B8E986",bg:"#B8E98618"},NEUTRAL:{label:"中立",emoji:"⚪",color:"#888",bg:"#88888818"},SLIGHTLY_BEARISH:{label:"やや弱気",emoji:"🟠",color:"#F5A623",bg:"#F5A62318"},BEARISH:{label:"弱気",emoji:"🔴",color:"#E8453C",bg:"#E8453C18"}};
+const COMPARE_COLORS=['#3D9BFF','#FF8C42'];
 
 // ─── DEMO DATA ──────────────────────────────────────────────────────────
 function genDemo(ind,years=15){const d=[];const now=new Date();const m=years*12;const isQ=["GDP","JP_GDP","EU_GDP","IN_GDP"].includes(ind);const isD=["DGS10","DGS2","T10Y2Y","VIX","SP500","GSPC","JP_USDJPY","BITCOIN","HYSPREAD","EURUSD","IN_USDINR","GOLD","OIL_WTI"].includes(ind);const isW=ind==="ICSA";const step=isQ?3:1;const total=isD?years*252:m;
@@ -339,16 +340,17 @@ function CTip({active,payload,label,indicator}){if(!active||!payload?.length)ret
 
 function Gauge({score,size=110}){const a=(score/100)*180-180;const r=size/2-8;const cx=size/2;const cy=size/2+5;const nx=cx+r*.7*Math.cos(a*Math.PI/180);const ny=cy+r*.7*Math.sin(a*Math.PI/180);return(<svg width={size} height={size*.62} viewBox={`0 0 ${size} ${size*.62}`}><defs><linearGradient id="gg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#E8453C"/><stop offset="25%" stopColor="#F5A623"/><stop offset="50%" stopColor="#888"/><stop offset="75%" stopColor="#B8E986"/><stop offset="100%" stopColor="#7ED321"/></linearGradient></defs><path d={`M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy}`} fill="none" stroke="url(#gg)" strokeWidth="6" strokeLinecap="round"/><line x1={cx} y1={cy} x2={nx} y2={ny} stroke="#e8e8e8" strokeWidth="2" strokeLinecap="round"/><circle cx={cx} cy={cy} r="3" fill="#e8e8e8"/><text x={cx-r+2} y={cy+14} fill="#E8453C" fontSize="8" fontFamily="monospace">弱気</text><text x={cx+r-18} y={cy+14} fill="#7ED321" fontSize="8" fontFamily="monospace">強気</text></svg>);}
 
-function MiniCard({ind,data,isSel,onClick,sig}){const inf=INDICATORS[ind];const lt=data?.[data.length-1];const pv=data?.[data.length-2];const ch=lt&&pv?((lt.value-pv.value)/pv.value*100):0;const up=ch>=0;const sl=sig?SL[sig.signal]:null;const [hov,setHov]=useState(false);
+function MiniCard({ind,data,isSel,onClick,sig,accentColor}){const inf=INDICATORS[ind];const ac=accentColor||inf.color;const lt=data?.[data.length-1];const pv=data?.[data.length-2];const ch=lt&&pv?((lt.value-pv.value)/pv.value*100):0;const up=ch>=0;const sl=sig?SL[sig.signal]:null;const [hov,setHov]=useState(false);const spark=data?data.slice(-40):[];
 return(<div style={{position:"relative"}} onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}>
-<button onClick={onClick} style={{background:isSel?inf.color+"0D":"rgba(255,255,255,.015)",border:"1px solid "+(isSel?inf.color+"50":"rgba(255,255,255,.05)"),borderRadius:10,padding:"10px 12px",cursor:"pointer",textAlign:"left",transition:"all .25s",position:"relative",overflow:"hidden",width:"100%"}}>
-{isSel&&<div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:inf.color}}/>}
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><p style={{color:"#aaa",fontSize:12,margin:0,fontWeight:600}}>{inf.name}</p>{sl&&<span style={{background:sl.bg,color:sl.color,padding:"1px 5px",borderRadius:4,fontSize:9,fontWeight:700,fontFamily:"monospace"}}>{sl.emoji}</span>}</div>
-<div style={{display:"flex",alignItems:"baseline",gap:6,marginTop:5}}><span style={{color:inf.color,fontSize:19,fontWeight:800,fontFamily:"monospace"}}>{lt?Number(lt.value).toLocaleString(undefined,{maximumFractionDigits:2}):"—"}</span><span style={{color:up?"#7ED321":"#E8453C",fontSize:10,fontWeight:700,fontFamily:"monospace"}}>{up?"▲":"▼"}{Math.abs(ch).toFixed(2)}%</span></div>
+<button onClick={onClick} style={{background:isSel?ac+"14":"rgba(255,255,255,.015)",border:"1px solid "+(isSel?ac+"55":"rgba(255,255,255,.05)"),borderRadius:10,padding:"10px 12px 6px",cursor:"pointer",textAlign:"left",transition:"all .25s",position:"relative",overflow:"hidden",width:"100%"}}>
+{isSel&&<div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:ac,borderRadius:"3px 0 0 3px"}}/>}
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><p style={{color:"#aaa",fontSize:11,margin:0,fontWeight:600}}>{inf.name}</p>{sl&&<span style={{background:sl.bg,color:sl.color,padding:"1px 5px",borderRadius:4,fontSize:9,fontWeight:700,fontFamily:"monospace"}}>{sl.emoji}</span>}</div>
+<div style={{display:"flex",alignItems:"baseline",gap:6,marginTop:4}}><span style={{color:"#e4e4e4",fontSize:18,fontWeight:800,fontFamily:"monospace"}}>{lt?Number(lt.value).toLocaleString(undefined,{maximumFractionDigits:2}):"—"}</span><span style={{color:up?"#7ED321":"#E8453C",fontSize:10,fontWeight:700,fontFamily:"monospace"}}>{up?"▲":"▼"}{Math.abs(ch).toFixed(2)}%</span></div>
+{spark.length>2&&<div style={{width:"100%",height:26,marginTop:3}}><ResponsiveContainer width="100%" height="100%"><AreaChart data={spark} margin={{top:1,right:0,left:0,bottom:0}}><defs><linearGradient id={"sc-"+ind} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={isSel?ac:"rgba(255,255,255,.3)"} stopOpacity={isSel?.25:.06}/><stop offset="100%" stopColor={isSel?ac:"rgba(255,255,255,.3)"} stopOpacity={0}/></linearGradient></defs><XAxis dataKey="date" hide/><YAxis hide domain={["auto","auto"]}/><Area type="monotone" dataKey="value" stroke={isSel?ac:"rgba(255,255,255,.15)"} strokeWidth={isSel?1.5:1} fill={"url(#sc-"+ind+")"} dot={false}/></AreaChart></ResponsiveContainer></div>}
 </button>
-{hov&&<div style={{position:"absolute",top:"calc(100% + 5px)",left:0,minWidth:"100%",width:"max-content",maxWidth:260,background:"rgba(8,8,13,.97)",border:"1px solid "+inf.color+"40",borderRadius:9,padding:"9px 11px",zIndex:300,pointerEvents:"none",boxShadow:"0 6px 24px rgba(0,0,0,.7)"}}>
+{hov&&<div style={{position:"absolute",top:"calc(100% + 5px)",left:0,minWidth:"100%",width:"max-content",maxWidth:260,background:"rgba(8,8,13,.97)",border:"1px solid "+ac+"40",borderRadius:9,padding:"9px 11px",zIndex:300,pointerEvents:"none",boxShadow:"0 6px 24px rgba(0,0,0,.7)"}}>
   <p style={{color:"#bbb",fontSize:10,margin:0,lineHeight:1.65,fontWeight:500}}>{inf.desc}</p>
-  <p style={{color:inf.color+"dd",fontSize:9,margin:"6px 0 0",fontFamily:"monospace",lineHeight:1.5}}>↗ {inf.impact}</p>
+  <p style={{color:ac+"dd",fontSize:9,margin:"6px 0 0",fontFamily:"monospace",lineHeight:1.5}}>↗ {inf.impact}</p>
   <p style={{color:"#444",fontSize:8,margin:"5px 0 0",fontFamily:"monospace"}}>{inf.freq} · {inf.unit} · {inf.id}</p>
 </div>}
 </div>);}
@@ -495,12 +497,12 @@ export default function App(){
   {/* CARDS */}
   {vw===VS.C&&<p style={{color:"#555",fontSize:9,fontFamily:"monospace",margin:"0 0 6px"}}>カードを2つ選択（左軸・右軸で実値表示） · 選択中: {ci.length}/2</p>}
   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:6,marginBottom:10}}>
-    {filteredInds.map(k=><MiniCard key={k} ind={k} data={gf(k)}
+    {filteredInds.map(k=>{const ciIdx=ci.indexOf(k);const ac=vw===VS.C&&ciIdx>=0?COMPARE_COLORS[ciIdx]:undefined;return(<MiniCard key={k} ind={k} data={gf(k)}
       isSel={vw===VS.C ? ci.includes(k) : sel===k}
       onClick={vw===VS.C
         ? ()=>setCi(p=>p.includes(k)?p.filter(x=>x!==k):p.length>=2?p:[...p,k])
         : ()=>setSel(k)}
-      sig={sigs[k]}/>)}
+      sig={sigs[k]} accentColor={ac}/>);})}
   </div>
 
   {/* TABS + TIMEFRAME */}
@@ -552,9 +554,10 @@ export default function App(){
       {ci.length===0
         ? <span style={{color:"#444",fontSize:9,fontFamily:"monospace"}}>↑ 上のカードから2つ選択してください</span>
         : <>
-          {ci.map((k,idx)=>{const i2=INDICATORS[k];const axisLabel=ci.length<2?"":effectiveShared?"共通軸":idx===0?"左軸":"右軸";return(<span key={k} style={{display:"inline-flex",alignItems:"center",gap:4,background:i2.color+"18",border:"1px solid "+i2.color+"40",borderRadius:20,padding:"2px 8px 2px 10px",fontSize:10,color:i2.color,fontWeight:600}}>
-              {axisLabel&&<span style={{color:i2.color+"88",fontSize:8}}>{axisLabel}</span>} {i2.name}
-              <button onClick={()=>setCi(p=>p.filter(x=>x!==k))} style={{background:"transparent",border:"none",color:i2.color+"99",fontSize:11,cursor:"pointer",padding:0,lineHeight:1,fontWeight:700}}>×</button>
+          {ci.map((k,idx)=>{const i2=INDICATORS[k];const cc=COMPARE_COLORS[idx]||i2.color;const axisLabel=ci.length<2?"":effectiveShared?"共通軸":idx===0?"左軸":"右軸";return(<span key={k} style={{display:"inline-flex",alignItems:"center",gap:4,background:cc+"18",border:"1px solid "+cc+"50",borderRadius:20,padding:"2px 8px 2px 10px",fontSize:10,color:cc,fontWeight:600}}>
+              <span style={{color:cc,fontSize:12,fontWeight:800,fontFamily:"monospace"}}>{idx===0?"①":"②"}</span>
+              {axisLabel&&<span style={{color:cc+"99",fontSize:8}}>{axisLabel}</span>} {i2.name}
+              <button onClick={()=>setCi(p=>p.filter(x=>x!==k))} style={{background:"transparent",border:"none",color:cc+"99",fontSize:11,cursor:"pointer",padding:0,lineHeight:1,fontWeight:700}}>×</button>
             </span>);})}
           {ci.length===2&&<span style={{color:"#444",fontSize:9,fontFamily:"monospace",marginLeft:4}}>{effectiveShared?"· 同スケールのため共通軸":forceDual?"· 右軸に分離中（手動）":"· スケール差大のため左右軸"}</span>}
         </>}
@@ -562,11 +565,11 @@ export default function App(){
     <div style={{width:"100%",height:300}}><ResponsiveContainer><LineChart data={cpd} margin={{top:5,right:(!effectiveShared&&ci.length>1)?55:10,left:0,bottom:0}}>
       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,.03)"/>
       <XAxis dataKey="date" tick={{fill:"#888",fontSize:9,fontFamily:"monospace"}} tickFormatter={fa} stroke="rgba(255,255,255,.04)" interval="preserveStartEnd" minTickGap={40}/>
-      <YAxis yAxisId="left" orientation="left" tick={{fill:ci[0]?(effectiveShared?"#888":INDICATORS[ci[0]].color+"cc"):"#888",fontSize:9,fontFamily:"monospace"}} stroke="rgba(255,255,255,.04)" tickFormatter={fv} width={50} domain={["auto","auto"]}/>
-      {ci.length>1&&!effectiveShared&&<YAxis yAxisId="right" orientation="right" tick={{fill:INDICATORS[ci[1]].color+"cc",fontSize:9,fontFamily:"monospace"}} stroke="rgba(255,255,255,.04)" tickFormatter={fv} width={50} domain={["auto","auto"]}/>}
-      <Tooltip content={({active,payload,label})=>{if(!active||!payload?.length)return null;return(<div style={{background:"rgba(10,10,15,.96)",border:"1px solid rgba(255,255,255,.1)",borderRadius:8,padding:"8px 12px"}}><p style={{color:"#666",fontSize:10,margin:0,fontFamily:"monospace"}}>{label}</p>{payload.map((p,i)=>{const ind=INDICATORS[p.dataKey];return(<p key={i} style={{color:p.color,fontSize:11,fontWeight:700,margin:"2px 0 0",fontFamily:"monospace"}}>{ind?.name}: {p.value?.toLocaleString(undefined,{maximumFractionDigits:2})} <span style={{color:"#555",fontWeight:400}}>{ind?.unit}</span></p>);})}</div>);}}/>
-      {ci[0]&&<Line yAxisId="left" type="monotone" dataKey={ci[0]} stroke={INDICATORS[ci[0]].color} strokeWidth={2} dot={false} name={INDICATORS[ci[0]].name}/>}
-      {ci[1]&&<Line yAxisId={effectiveShared?"left":"right"} type="monotone" dataKey={ci[1]} stroke={INDICATORS[ci[1]].color} strokeWidth={2} dot={false} name={INDICATORS[ci[1]].name}/>}
+      <YAxis yAxisId="left" orientation="left" tick={{fill:ci[0]?(effectiveShared?"#888":COMPARE_COLORS[0]+"cc"):"#888",fontSize:9,fontFamily:"monospace"}} stroke="rgba(255,255,255,.04)" tickFormatter={fv} width={50} domain={["auto","auto"]}/>
+      {ci.length>1&&!effectiveShared&&<YAxis yAxisId="right" orientation="right" tick={{fill:COMPARE_COLORS[1]+"cc",fontSize:9,fontFamily:"monospace"}} stroke="rgba(255,255,255,.04)" tickFormatter={fv} width={50} domain={["auto","auto"]}/>}
+      <Tooltip content={({active,payload,label})=>{if(!active||!payload?.length)return null;return(<div style={{background:"rgba(10,10,15,.96)",border:"1px solid rgba(255,255,255,.1)",borderRadius:8,padding:"8px 12px"}}><p style={{color:"#666",fontSize:10,margin:0,fontFamily:"monospace"}}>{label}</p>{payload.map((p,i)=>{const ind=INDICATORS[p.dataKey];const cc=COMPARE_COLORS[i]||p.color;return(<p key={i} style={{color:cc,fontSize:11,fontWeight:700,margin:"2px 0 0",fontFamily:"monospace"}}><span style={{fontWeight:800}}>{i===0?"①":"②"}</span> {ind?.name}: {p.value?.toLocaleString(undefined,{maximumFractionDigits:2})} <span style={{color:"#555",fontWeight:400}}>{ind?.unit}</span></p>);})}</div>);}}/>
+      {ci[0]&&<Line yAxisId="left" type="monotone" dataKey={ci[0]} stroke={COMPARE_COLORS[0]} strokeWidth={2.5} dot={false} name={INDICATORS[ci[0]].name}/>}
+      {ci[1]&&<Line yAxisId={effectiveShared?"left":"right"} type="monotone" dataKey={ci[1]} stroke={COMPARE_COLORS[1]} strokeWidth={2.5} dot={false} name={INDICATORS[ci[1]].name}/>}
       <Legend formatter={v=>INDICATORS[v]?.name||v} wrapperStyle={{fontSize:9,fontFamily:"monospace"}}/>
     </LineChart></ResponsiveContainer></div>
   </div>)}
