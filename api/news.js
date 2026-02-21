@@ -25,14 +25,19 @@ export default async function handler(req, res) {
 
   const sources = [
     {
-      label: 'Reuters',
-      color: '#FF8000',
-      url: 'https://jp.reuters.com/arc/outboundfeeds/rss/?outputType=xml',
-    },
-    {
       label: 'NHK経済',
       color: '#0070C0',
       url: 'https://www3.nhk.or.jp/rss/news/cat5.xml',
+    },
+    {
+      label: '東洋経済',
+      color: '#E60012',
+      url: 'https://toyokeizai.net/list/feed/rss',
+    },
+    {
+      label: 'ダイヤモンド',
+      color: '#0099CC',
+      url: 'https://diamond.jp/list/feed/rss/dol',
     },
   ];
 
