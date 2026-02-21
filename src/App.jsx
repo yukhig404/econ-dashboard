@@ -686,10 +686,10 @@ export default function App(){
         <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"8px 10px",background:"rgba(255,255,255,.015)",borderRadius:8,borderLeft:"3px solid "+item.sourceColor}}>
           <div style={{flex:1,minWidth:0}}>
             <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}>
-              <span style={{background:item.sourceColor+"20",color:item.sourceColor,fontSize:8,fontWeight:700,fontFamily:"monospace",padding:"1px 5px",borderRadius:3,whiteSpace:"nowrap"}}>{item.source}</span>
-              {item.pubDate&&<span style={{color:"#444",fontSize:8,fontFamily:"monospace",whiteSpace:"nowrap"}}>{(()=>{try{const d=new Date(item.pubDate);return d.toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return '';}})()}</span>}
+              <span style={{background:item.sourceColor+"20",color:item.sourceColor,fontSize:10,fontWeight:700,fontFamily:"monospace",padding:"1px 5px",borderRadius:3,whiteSpace:"nowrap"}}>{item.source}</span>
+              {item.pubDate&&<span style={{color:"#444",fontSize:10,fontFamily:"monospace",whiteSpace:"nowrap"}}>{(()=>{try{const d=new Date(item.pubDate);return d.toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return '';}})()}</span>}
             </div>
-            <a href={item.link||'#'} target="_blank" rel="noopener noreferrer" style={{color:"#ccc",fontSize:12,fontWeight:500,textDecoration:"none",lineHeight:1.5,display:"block"}}
+            <a href={item.link||'#'} target="_blank" rel="noopener noreferrer" style={{color:"#ccc",fontSize:14,fontWeight:500,textDecoration:"none",lineHeight:1.5,display:"block"}}
               onMouseEnter={e=>e.target.style.color='#e8e8e8'} onMouseLeave={e=>e.target.style.color='#ccc'}>
               {item.title}
             </a>
