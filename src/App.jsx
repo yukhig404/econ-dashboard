@@ -693,6 +693,7 @@ export default function App(){
               onMouseEnter={e=>e.target.style.color='#e8e8e8'} onMouseLeave={e=>e.target.style.color='#ccc'}>
               {item.title}
             </a>
+            {item.desc&&<p style={{margin:"4px 0 0",color:"#666",fontSize:11,lineHeight:1.5}}>{item.desc}{item.desc.length>=120?'…':''}</p>}
           </div>
           <button onClick={()=>window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(item.title+(item.link?' '+item.link:'')),'_blank')}
             style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:5,padding:"4px 7px",color:"#888",fontSize:10,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,fontFamily:"monospace"}}>

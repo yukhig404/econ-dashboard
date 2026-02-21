@@ -14,7 +14,9 @@ function parseRSS(xml, source, sourceColor) {
     const title = get('title').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
     if (!title) continue;
     const pubDate = get('pubDate') || get('dc:date') || get('published') || '';
-    items.push({ title, link, pubDate, source, sourceColor });
+    const rawDesc = get('description') || get('summary') || '';
+    const desc = rawDesc.replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/\s+/g,' ').trim().slice(0,120);
+    items.push({ title, link, pubDate, desc, source, sourceColor });
   }
   return items;
 }
