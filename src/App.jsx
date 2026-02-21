@@ -12,6 +12,7 @@ const CATEGORIES = {
   economy:{name:"景気",emoji:"📊",color:"#1ABC9C"},
   market:{name:"市場",emoji:"📈",color:"#9B59B6"},
   japan:{name:"日本",emoji:"🇯🇵",color:"#BC002D"},
+  commodity:{name:"コモディティ",emoji:"🪙",color:"#DAA520"},
 };
 
 const INDICATORS = {
@@ -36,6 +37,17 @@ const INDICATORS = {
   JP_INDPRO:{id:"JPNPROINDMISMEI",name:"鉱工業生産(日)",nameEn:"Japan IP",unit:"指数",color:"#1ABC9C",cat:"japan",freq:"月次",desc:"日本の製造業の生産活動。景気の先行指標。",impact:"生産増→輸出拡大→GDP押し上げ",nextRel:"2026-02-28",relName:"鉱工業生産"},
   JP_JGB10:{id:"IRLTLT01JPM156N",name:"10年JGB利回り",nameEn:"Japan 10Y JGB",unit:"%",color:"#3498DB",cat:"japan",freq:"月次",desc:"日本国債10年利回り。日銀YCC終了後に注目。",impact:"利回り上昇→円高・銀行株高",nextRel:"-",relName:"-"},
   JP_NIKKEI:{id:"NIKKEI225",name:"日経225",nameEn:"Nikkei 225",unit:"指数",color:"#9B59B6",cat:"japan",freq:"日次",desc:"東証上場の代表的な225銘柄の株価指数。",impact:"日本株市場のベンチマーク",nextRel:"-",relName:"-"},
+  JP_USDJPY:{id:"DEXJPUS",name:"ドル円",nameEn:"USD/JPY",unit:"円",color:"#E8453C",cat:"japan",freq:"日次",desc:"米ドル対日本円の為替レート。日本の輸出企業業績に直結。",impact:"円安→輸出企業増益・輸入物価上昇",nextRel:"-",relName:"-"},
+  JP_CORECPI:{id:"JPNCPICORMINMEI",name:"コアCPI(日)",nameEn:"Japan Core CPI",unit:"指数",color:"#FF8888",cat:"japan",freq:"月次",desc:"食品・エネルギーを除く日本のCPI。日銀の物価判断に重要。",impact:"コアCPI上昇→日銀引き締め圧力→円高",nextRel:"2026-03-20",relName:"消費者物価"},
+  JP_RETAIL:{id:"JPNSLRTTO02IXNSA",name:"小売売上(日)",nameEn:"Japan Retail Sales",unit:"指数",color:"#D46A6A",cat:"japan",freq:"月次",desc:"日本の小売業の販売動向。個人消費の強さを反映。",impact:"増加→消費好調→景気改善→円高",nextRel:"2026-02-28",relName:"商業動態統計"},
+  JP_CONF:{id:"CSCICP03JPM665S",name:"消費者信頼感(日)",nameEn:"Japan Consumer Confidence",unit:"指数",color:"#C04040",cat:"japan",freq:"月次",desc:"OECD消費者信頼感指数。100超で楽観、100未満で悲観。",impact:"上昇→消費拡大期待→景気好転",nextRel:"2026-03-10",relName:"消費動向調査"},
+  JP_M2:{id:"MYAGM2JPM189N",name:"マネーサプライM2(日)",nameEn:"Japan M2",unit:"十億円",color:"#A03030",cat:"japan",freq:"月次",desc:"日本の通貨供給量。日銀の金融政策の効果と流動性を測る。",impact:"増加→流動性拡大→資産価格支持",nextRel:"-",relName:"-"},
+  JP_HOUSING:{id:"JPNHOUST",name:"住宅着工(日)",nameEn:"Japan Housing Starts",unit:"千戸",color:"#802020",cat:"japan",freq:"月次",desc:"新設住宅着工戸数。建設・不動産業の先行指標。",impact:"増加→内需拡大・建設業好調",nextRel:"2026-03-31",relName:"建設着工統計"},
+  JP_TRADE:{id:"JPNXTIMVA01STSAM",name:"貿易収支(日)",nameEn:"Japan Trade Balance",unit:"百万$",color:"#601010",cat:"japan",freq:"月次",desc:"輸出額から輸入額を引いた貿易収支。円相場・経常収支に影響。",impact:"黒字拡大→円高圧力 / 赤字→円安圧力",nextRel:"2026-02-20",relName:"貿易統計"},
+  GOLD:{id:"GOLDAMGBD228NLBM",name:"金価格",nameEn:"Gold",unit:"$/oz",color:"#FFD700",cat:"commodity",freq:"日次",desc:"ロンドン金価格。リスクオフ・インフレヘッジ資産の代表格。",impact:"上昇→リスクオフ or インフレ懸念強まる",nextRel:"-",relName:"-"},
+  SILVER:{id:"SLVPRUSD",name:"銀価格",nameEn:"Silver",unit:"$/oz",color:"#C0C0C0",cat:"commodity",freq:"日次",desc:"ロンドン銀価格。金と連動しつつ工業需要にも敏感。",impact:"上昇→インフレ懸念・工業需要増加シグナル",nextRel:"-",relName:"-"},
+  COPPER:{id:"PCOPPUSDM",name:"銅価格",nameEn:"Copper",unit:"$/MT",color:"#B87333",cat:"commodity",freq:"月次",desc:"国際銅価格。「Dr. Copper」とも呼ばれ景気の先行指標。",impact:"上昇→世界景気拡大シグナル",nextRel:"-",relName:"-"},
+  BITCOIN:{id:"CBBTCUSD",name:"ビットコイン",nameEn:"Bitcoin",unit:"$",color:"#F7931A",cat:"commodity",freq:"日次",desc:"Coinbase取引所のBTC/USD価格。リスク資産のバロメーター。",impact:"上昇→リスクオン・暗号資産市場活況",nextRel:"-",relName:"-"},
 };
 
 const TFS=[{l:"1Y",y:1},{l:"3Y",y:3},{l:"5Y",y:5},{l:"10Y",y:10},{l:"MAX",y:30}];
@@ -43,7 +55,7 @@ const VS={S:"single",M:"multi",C:"compare",T:"table"};
 const SL={BULLISH:{label:"強気",emoji:"🟢",color:"#7ED321",bg:"#7ED32118"},SLIGHTLY_BULLISH:{label:"やや強気",emoji:"🟡",color:"#B8E986",bg:"#B8E98618"},NEUTRAL:{label:"中立",emoji:"⚪",color:"#888",bg:"#88888818"},SLIGHTLY_BEARISH:{label:"やや弱気",emoji:"🟠",color:"#F5A623",bg:"#F5A62318"},BEARISH:{label:"弱気",emoji:"🔴",color:"#E8453C",bg:"#E8453C18"}};
 
 // ─── DEMO DATA ──────────────────────────────────────────────────────────
-function genDemo(ind,years=15){const d=[];const now=new Date();const m=years*12;const isQ=ind==="GDP";const isD=["DGS10","DGS2","T10Y2Y","VIX","SP500"].includes(ind);const isW=ind==="ICSA";const step=isQ?3:1;const total=isD?years*252:m;
+function genDemo(ind,years=15){const d=[];const now=new Date();const m=years*12;const isQ=ind==="GDP";const isD=["DGS10","DGS2","T10Y2Y","VIX","SP500","JP_USDJPY","GOLD","SILVER","BITCOIN"].includes(ind);const isW=ind==="ICSA";const step=isQ?3:1;const total=isD?years*252:m;
 for(let i=total;i>=0;i-=step){const date=isD?new Date(now.getTime()-i*864e5*1.4):new Date(now.getFullYear(),now.getMonth()-i,1);if(isD&&(date.getDay()===0||date.getDay()===6))continue;let v;const t=(total-i)/total;
 switch(ind){
 case"NFP":v=140000+t*18000+Math.sin(t*20)*2000+(Math.random()-.5)*1500;break;
@@ -67,6 +79,17 @@ case"JP_BOJ":if(t<.6)v=-.1+(Math.random()-.5)*.05;else if(t<.75)v=.1+(t-.6)*.5;e
 case"JP_INDPRO":v=95+t*15+Math.sin(t*12)*5+(Math.random()-.5)*3;if(t>.3&&t<.35)v*=.92;break;
 case"JP_JGB10":v=.1+t*1.4+Math.sin(t*15)*.2+(Math.random()-.5)*.08;v=Math.max(.05,v);break;
 case"JP_NIKKEI":v=15000+t*25000+Math.sin(t*15)*2000+(Math.random()-.5)*800;if(t>.3&&t<.35)v*=.82;break;
+case"JP_USDJPY":v=80+t*70+Math.sin(t*12)*15+(Math.random()-.5)*2;v=Math.max(75,Math.min(162,v));break;
+case"JP_CORECPI":v=98+t*12+Math.sin(t*8)*.5+(Math.random()-.5)*.4;break;
+case"JP_RETAIL":v=85+t*20+Math.sin(t*12)*5+(Math.random()-.5)*2;break;
+case"JP_CONF":v=99+t*3+Math.sin(t*10)*2+(Math.random()-.5)*.8;break;
+case"JP_M2":v=700000+t*400000+Math.sin(t*5)*10000+(Math.random()-.5)*5000;break;
+case"JP_HOUSING":v=75+t*15+Math.sin(t*10)*8+(Math.random()-.5)*4;break;
+case"JP_TRADE":v=-5000+t*3000+Math.sin(t*12)*8000+(Math.random()-.5)*3000;break;
+case"GOLD":v=1100+t*1600+Math.sin(t*15)*150+(Math.random()-.5)*80;if(t>.3&&t<.35)v*=.9;break;
+case"SILVER":v=15+t*20+Math.sin(t*15)*5+(Math.random()-.5)*2;break;
+case"COPPER":v=3000+t*5000+Math.sin(t*12)*1000+(Math.random()-.5)*300;break;
+case"BITCOIN":v=500+Math.pow(t,2.5)*110000+Math.sin(t*30)*5000+(Math.random()-.5)*5000;v=Math.max(200,v);break;
 default:v=100+t*50;}
 d.push({date:date.toISOString().split("T")[0],value:Math.round(v*100)/100});}
 return d.sort((a,b)=>a.date.localeCompare(b.date));}
@@ -103,6 +126,17 @@ else if(k==="JP_BOJ"){if(lt<0){sc+=10;reasons.push("マイナス金利");}else i
 else if(k==="JP_INDPRO"){if(tr>3){sc+=15;reasons.push("生産好調");}else if(tr>0){sc+=5;reasons.push("緩やか増産");}else{sc-=15;reasons.push("生産減少");}}
 else if(k==="JP_JGB10"){if(lt>1.5){sc-=10;reasons.push(lt.toFixed(2)+"%: 上昇懸念");}else if(lt>0.5){sc+=5;reasons.push(lt.toFixed(2)+"%: 正常化");}else{sc+=10;reasons.push(lt.toFixed(2)+"%: 低水準");}}
 else if(k==="JP_NIKKEI"){if(tr>10){sc+=15;reasons.push("強い上昇");}else if(tr>0){sc+=8;reasons.push("上昇基調");}else{sc-=15;reasons.push("下落基調");}}
+else if(k==="JP_USDJPY"){if(lt>150){sc-=10;reasons.push(lt.toFixed(0)+"円: 過度な円安");}else if(lt>140){sc+=5;reasons.push(lt.toFixed(0)+"円: 輸出に有利");}else if(lt>125){sc+=10;reasons.push(lt.toFixed(0)+"円: 適正圏");}else{sc+=5;reasons.push(lt.toFixed(0)+"円: 円高");}if(mom>0){sc-=5;reasons.push("円安進行中");}else if(mom<0){sc+=5;reasons.push("円高方向");}}
+else if(k==="JP_CORECPI"){const yoy=data.length>12?((lt-data[data.length-13].value)/data[data.length-13].value)*100:tr;if(yoy>3){sc-=15;reasons.push("YoY "+yoy.toFixed(1)+"%: 高インフレ");}else if(yoy>=1.5){sc+=15;reasons.push("YoY "+yoy.toFixed(1)+"%: 目標圏内");}else{sc-=5;reasons.push("YoY "+yoy.toFixed(1)+"%: 低インフレ");}}
+else if(k==="JP_RETAIL"){if(tr>3){sc+=15;reasons.push("消費堅調");}else if(tr>0){sc+=5;reasons.push("消費微増");}else{sc-=10;reasons.push("消費減退");}}
+else if(k==="JP_CONF"){if(lt>101){sc+=15;reasons.push(lt.toFixed(1)+": 楽観的");}else if(lt>=100){sc+=5;reasons.push(lt.toFixed(1)+": やや楽観");}else if(lt>=98){sc-=5;reasons.push(lt.toFixed(1)+": やや悲観");}else{sc-=15;reasons.push(lt.toFixed(1)+": 悲観的");}}
+else if(k==="JP_M2"){if(tr>3){sc+=10;reasons.push("流動性拡大");}else if(tr>0){sc+=5;reasons.push("緩やか増加");}else{sc-=10;reasons.push("流動性縮小");}}
+else if(k==="JP_HOUSING"){if(tr>5){sc+=15;reasons.push("着工増: 内需好調");}else if(tr>0){sc+=5;reasons.push("着工微増");}else{sc-=15;reasons.push("着工減: 内需懸念");}}
+else if(k==="JP_TRADE"){if(lt>5000){sc+=15;reasons.push("貿易黒字: 円高圧力");}else if(lt>0){sc+=5;reasons.push("貿易黒字");}else if(lt>-5000){sc-=5;reasons.push("小幅赤字");}else{sc-=15;reasons.push("貿易赤字拡大");}if(mom>0){sc+=5;reasons.push("改善中");}else{sc-=5;reasons.push("悪化中");}}
+else if(k==="GOLD"){if(tr>20){sc-=15;reasons.push("金急騰: リスクオフ");}else if(tr>8){sc-=5;reasons.push("金上昇: 警戒感");}else if(tr>0){sc+=5;reasons.push("金安定上昇");}else{sc+=10;reasons.push("金下落: リスクオン");}}
+else if(k==="SILVER"){if(tr>15){sc-=5;reasons.push("銀急騰");}else if(tr>3){sc+=5;reasons.push("銀上昇中");}else if(tr>0){sc+=3;reasons.push("銀安定");}else{sc-=5;reasons.push("銀下落");}}
+else if(k==="COPPER"){if(tr>15){sc+=20;reasons.push("銅急騰: 景気期待強");}else if(tr>5){sc+=12;reasons.push("銅上昇: 景気好調");}else if(tr>0){sc+=5;reasons.push("銅安定");}else if(tr>-5){sc-=5;reasons.push("銅軟調");}else{sc-=18;reasons.push("銅急落: 景気懸念");}}
+else if(k==="BITCOIN"){if(tr>50){sc+=15;reasons.push("BTC急騰: リスクオン");}else if(tr>15){sc+=8;reasons.push("BTC上昇中");}else if(tr>0){sc+=3;reasons.push("BTC横ばい");}else if(tr>-20){sc-=5;reasons.push("BTC軟調");}else{sc-=12;reasons.push("BTC急落: リスクオフ");}}
 
 sc=Math.max(0,Math.min(100,sc));let sig="NEUTRAL";if(sc>=70)sig="BULLISH";else if(sc>=55)sig="SLIGHTLY_BULLISH";else if(sc<=30)sig="BEARISH";else if(sc<=45)sig="SLIGHTLY_BEARISH";
 sigs[k]={signal:sig,score:sc,reasons};});
