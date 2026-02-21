@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/econ-dashboard/',  // ← GitHubリポジトリ名に合わせて変更
+  base: '/',
   server: {
     proxy: {
       '/api/fred': {
